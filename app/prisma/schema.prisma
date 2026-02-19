@@ -1,0 +1,74 @@
+// Production-ready foundation (2026)
+
+
+/* =============================
+1. BACKEND STACK
+============================= */
+
+
+// Runtime: Node.js 20
+// Framework: Next.js 15 (App Router)
+// Auth: Auth.js (NextAuth v5)
+// DB: PostgreSQL
+// ORM: Prisma
+// APIs: tRPC
+// Hosting: Vercel / AWS
+/* =============================
+2. PRISMA SCHEMA
+============================= */
+
+
+// prisma/schema.prisma
+
+
+generator client {
+provider = "prisma-client-js"
+}
+
+
+datasource db {
+provider = "postgresql"
+url = env("DATABASE_URL")
+}
+
+
+model User {
+id String @id @default(cuid())
+email String @unique
+name String?
+image String?
+teams TeamMember[]
+projects Project[]
+createdAt DateTime @default(now())
+}
+
+
+model Team {
+id String @id @default(cuid())
+name String
+members TeamMember[]
+projects Project[]
+}
+
+
+model TeamMember {
+id String @id @default(cuid())
+role Role
+user User @relation(fields: [userId], references: [id])
+userId String
+team Team @relation(fields: [teamId], references: [id])
+teamId String
+}
+
+
+enum Role {
+ADMIN
+EDITOR
+VIEWER
+}
+
+
+model Project {
+id String @id @default(cuid())
+name String
+}

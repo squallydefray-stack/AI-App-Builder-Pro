@@ -1,0 +1,36 @@
+{
+  "pages": [
+    {
+      "name": "Home",
+      "route": "/",
+      "components": [
+        {
+          "type": "Container",
+          "props": { "className": "flex flex-col gap-6" },
+          "children": [
+            {
+              "type": "Text",
+              "props": { "text": "Welcome to MyApp", "className": "text-4xl font-bold" }
+            },
+            {
+              "type": "Button",
+              "props": { "text": "Get Started", "className": "px-6 py-3 bg-blue-600 text-white rounded" }
+            },
+            {
+              "type": "Container",
+              "props": { "className": "grid grid-cols-3 gap-4" },
+              "children": [
+                { "type": "Text", "props": { "text": "Feature 1" } },
+                { "type": "Text", "props": { "text": "Feature 2" } },
+                { "type": "Text", "props": { "text": "Feature 3" } }
+              ]
+            }
+          ]
+        },
+        { "type": "Container", "props": { "className": "bg-gray-100 p-6" }, "children": [
+            { "type": "Text", "props": { "text": "Footer content here" } }
+        ]}
+      ]
+    }
+  ]
+}

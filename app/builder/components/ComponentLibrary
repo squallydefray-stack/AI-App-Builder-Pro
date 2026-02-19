@@ -1,0 +1,32 @@
+/* =============================
+COMPONENT LIBRARY PANEL
+============================= */
+
+
+import { nanoid } from "nanoid";
+
+
+export function ComponentLibrary() {
+const addComponent = useBuilderStore((s) => s.addComponent);
+
+
+const add = (type: BuilderComponent["type"]) => {
+addComponent({
+id: nanoid(),
+type,
+props: {},
+style: {},
+position: { x: 100, y: 100 },
+});
+};
+
+
+return (
+<div className="space-y-2">
+<button onClick={() => add("Button")}>+ Button</button>
+<button onClick={() => add("Input")}>+ Input</button>
+<button onClick={() => add("Card")}>+ Card</button>
+<button onClick={() => add("Text")}>+ Text</button>
+</div>
+);
+}

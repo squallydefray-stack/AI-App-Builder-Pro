@@ -1,0 +1,48 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "forceConsistentCasingInFileNames": true,
+    "plugins": [
+      { "name": "next" }
+    ],
+
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["app/*"],
+      "@lib/*": ["lib/*"],
+      "@components/*": ["components/*"],
+      "@builder/*": ["builder/*"],
+      "@builderComponents/*": ["builder/components/*"],
+      "@properties/*": ["builder/properties/*"],
+      "@state/*": ["builder/state/*"],
+      "@canvas/*": ["builder/canvas/*"],
+      "@store/*": ["builder/store/*"],
+      "@ai/*": ["ai/*"],
+      "@export/*": ["export/*"],
+      "@server/*": ["server/*"],
+      "@plugins/*": ["plugins/*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts",
+    "**/*.mts",
+    "**/*.cts"
+  ],
+  "exclude": ["node_modules"]
+}
