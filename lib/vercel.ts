@@ -1,40 +1,74 @@
-//
-//  vercel.ts
-//  AI-App-Builder-Pro
-//
-//  Created by Squally Da Boss on 2/19/26.
-//
+// lib/vercel.ts
+import axios from "axios";
 
-
-import fetch from "node-fetch"
-
-interface VercelDeployOptions {
-  repoUrl: string
-  projectName: string
+interface DeployToVercelOptions {
+  repoUrl: string;      // GitHub repository URL
+  projectName: string;  // Unique Vercel project name
 }
 
-export async function deployToVercel({ repoUrl, projectName }: VercelDeployOptions) {
-  const response = await fetch("https://api.vercel.com/v13/deployments", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${process.env.VERCEL_TOKEN}`,
-      "Content-Type": "application/json",
+interface DeployToVercelResult {
+  deploymentId: string;
+  liveUrl: string;
+}
+
+export async function deployToVercel(
+  { repoUrl, projectName }: DeployToVercelOptions
+): Promise<DeployToVercelResult> {
+  if (!process.env.VERCEL_TOKEN || !process.env.VERCEL_ORG_ID) {
+    throw new Error("Missing VERCEL_TOKEN or VERCEL_ORG_ID environment variable");
+  }
+
+  // 1️⃣ Create a Vercel project
+  const createProjectRes = await axios.post(
+    "https://api.vercel.com/v9/projects",
+    {
+      name: projectName,
+      gitRepository: {
+        type: "github",
+        repo: repoUrl.split("/").slice(-2).join("/").replace(".git", ""),
+        productionBranch: "main",
+      },
+      framework: "nextjs",
     },
-    body: JSON.stringify({
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.VERCEL_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  const projectId = createProjectRes.data.id;
+  if (!projectId) throw new Error("Failed to create Vercel project");
+
+  // 2️⃣ Trigger a deployment
+  const deployRes = await axios.post(
+    `https://api.vercel.com/v13/deployments`,
+    {
       name: projectName,
       gitSource: {
         type: "github",
-        repoId: repoUrl.replace("https://github.com/", ""),
-        branch: "main",
+        repoOrg: repoUrl.split("/").slice(-2, -1)[0],
+        repoName: repoUrl.split("/").slice(-1)[0].replace(".git", ""),
+        productionBranch: "main",
       },
-      orgId: process.env.VERCEL_ORG_ID,
-      projectSettings: {
-        framework: "nextjs",
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.VERCEL_TOKEN}`,
+        "Content-Type": "application/json",
       },
-    }),
-  })
+    }
+  );
 
-  const data = await response.json()
-  if (!response.ok) throw new Error(data.error || "Vercel deployment failed")
-  return data.url || data.previewUrl
+  const deploymentId = deployRes.data.id;
+  const liveUrl = deployRes.data.url;
+
+  if (!deploymentId || !liveUrl) {
+    throw new Error("Vercel deployment failed");
+  }
+
+  console.log(`✅ Vercel deployment created: ${liveUrl} (ID: ${deploymentId})`);
+
+  return { deploymentId, liveUrl };
 }

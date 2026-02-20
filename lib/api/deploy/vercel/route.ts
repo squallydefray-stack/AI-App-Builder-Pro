@@ -5,12 +5,17 @@
 //  Created by Squally Da Boss on 2/19/26.
 //
 
-
 import { NextResponse } from "next/server"
 import { getBuilderSnapshot } from "@state/builderStore"
 import { generateNextProject } from "@export/next/generateNext"
 import { createRepoAndPush } from "@lib/github"
 import { deployToVercel } from "@lib/vercel"
+import { createClient } from "@supabase/supabase-js"
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 export async function POST() {
   try {
@@ -29,9 +34,41 @@ export async function POST() {
     const projectName = `${process.env.VERCEL_PROJECT_NAME_PREFIX}-${Date.now()}`
     const liveUrl = await deployToVercel({ repoUrl, projectName })
 
+    // 4️⃣ Store deployment in Supabase
+    const { data, error } = await supabase.from("deployments").insert({
+      project_id: null, // add if you have project IDs
+      deployment_id: projectName, // or Vercel deployment ID
+      live_url: liveUrl,
+    }).select().single()
+
+    if (error) {
+      console.warn("Failed to save deployment:", error.message)
+    }
+
+let accumulatedLogs = ""
+
+function appendLog(message: string) {
+  accumulatedLogs += message + "\n"
+}
+
+appendLog("Starting deployment...")
+appendLog(`Repo created: ${repoUrl}`)
+appendLog("Deploying to Vercel...")
+
+const liveUrl = await deployToVercel({ repoUrl, projectName })
+
+appendLog(`Live at: ${liveUrl}`)
+appendLog("Deployment complete")
+
+await supabase.from("deployments").insert({
+  deployment_id: projectName,
+  live_url: liveUrl,
+  logs: accumulatedLogs
+})
+
     return NextResponse.json({
       message: "Deployment successful!",
-      repoUrl,
+      deploymentId: data?.deployment_id || projectName,
       liveUrl,
     })
   } catch (err: any) {
