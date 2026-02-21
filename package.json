@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
- 
+
   "scripts": {
     "validate-env": "node scripts/validateEnv.mjs",
     "dev": "concurrently \"npm:dev:collab\"",
@@ -59,6 +59,6 @@
     "typescript": "^5.0.0",
     "y-websocket": "^3.0.0"
   },
-   "description": "Visual AI-powered app builder using Next.js, React Native export, and GitHub automation.",
-    "license": "ISC"
+  "description": "Visual AI-powered app builder using Next.js, React Native export, and GitHub automation.",
+  "license": "ISC"
 }
