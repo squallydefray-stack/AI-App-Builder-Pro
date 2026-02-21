@@ -14,39 +14,32 @@
     "jsx": "preserve",
     "incremental": true,
     "forceConsistentCasingInFileNames": true,
-    "plugins": [{ "name": "next" }],
     "baseUrl": ".",
     "paths": {
       "@/*": ["app/*"],
       "@lib/*": ["lib/*"],
       "@components/*": ["components/*"],
-
-      // Builder aliases
       "@builder/*": ["builder/*"],
       "@builderComponents/*": ["builder/components/*"],
       "@canvas/*": ["builder/canvas/*"],
-      "@state/*": ["builder/store/*"],
       "@properties/*": ["builder/properties/*"],
-
-      // AI & export
+      "@state/*": ["builder/state/*"],
+      "@store/*": ["builder/store/*"],
       "@ai/*": ["ai/*"],
       "@export/*": ["export/*"],
-
-      // Server
       "@server/*": ["server/*"],
-
-      // Plugins
       "@plugins/*": ["plugins/*"]
-    }
+    },
+    "plugins": [
+      { "name": "next" }
+    ]
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
-    "**/*.mts",
-    "**/*.cts"
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }
