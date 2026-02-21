@@ -1,6 +1,6 @@
 // lib/ai/planner.ts
 
-import { BuilderPage } from "../exporter/schema"
+import { BuilderPage } from "@lib/exporter/schema"
 
 /**
  * Mock function: generate a structured AI plan JSON from a text prompt

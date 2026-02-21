@@ -1,5 +1,5 @@
 "use client"
-import { useBuilderStore } from "../state/builderStore"
+import { useBuilderStore } from "@/state/builderStore"
 
 function renderNode(node: any): any {
   const Tag = node.type === "Header" ? "header" : "div"

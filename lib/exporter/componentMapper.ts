@@ -7,8 +7,8 @@
 
 
 // lib/exporter/componentMapper.ts
-import { BuilderComponent, Breakpoint, ResponsiveProps } from "./schema";
-import { serializeStyles } from "./styleSerializer";
+import { BuilderComponent, Breakpoint, ResponsiveProps } from "@lib/exporter/schema"
+import { serializeStyles } from "./styleSerializer"
 
 export function mapComponentToReact(component: BuilderComponent): string {
   const { type, props, children, responsiveProps } = component;

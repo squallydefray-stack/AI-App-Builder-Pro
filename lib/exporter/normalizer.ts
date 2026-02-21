@@ -8,7 +8,7 @@
 
 // lib/exporter/normalizer.ts
 
-import { BuilderComponent } from "../exporter/schema"
+import { BuilderComponent } from "@lib/exporter/schema"
 
 /*
   EXPORT TYPES

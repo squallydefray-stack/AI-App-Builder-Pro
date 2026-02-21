@@ -1,5 +1,5 @@
 // lib/ai/layoutEngine.ts
-import { BuilderComponent, ResponsiveProps } from "../exporter/schema";
+import { BuilderComponent, ResponsiveProps } from "@lib/exporter/schema";
 import { serializeStyles } from "../exporter/styleSerializer";
 
 /**

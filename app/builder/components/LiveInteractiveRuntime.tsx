@@ -9,7 +9,7 @@
 "use client"
 
 import React, { useRef, useState, useEffect, useCallback } from "react"
-import { useBuilderStore } from "../state/builderStore"
+import { useBuilderStore } from ".@/state/builderStore"
 import { BuilderComponent, BuilderSchema } from "@lib/exporter/schema"
 import { convertToNextTailwind, convertToReactNative } from "@/lib/exporter/codeGenerator"
 import { reflowAutoLayout } from "@/lib/utils/autoLayoutEngine"

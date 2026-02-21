@@ -9,8 +9,8 @@
 // app/builder/pages/LayoutEnginePage.tsx
 "use client"
 import React, { useEffect } from "react"
-import { useBuilderStore } from "../state/builderStore"
-import NodeRenderer from "../canvas/NodeRenderer"
+import { useBuilderStore } from "@/state/builderStore"
+import NodeRenderer from "./NodeRenderer"
 import { generateLayoutWithConstraints } from "../lib/layoutEngine2"
 
 export default function LayoutEnginePage() {

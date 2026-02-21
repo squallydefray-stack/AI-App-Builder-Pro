@@ -10,7 +10,7 @@
 
 import React from "react"
 import { BuilderComponent, Breakpoint } from "@lib/exporter/schema"
-import { useBuilderStore } from "../../../state/builderStore"
+import { useBuilderStore } from "@/state/builderStore"
 
 interface Props {
   component: BuilderComponent

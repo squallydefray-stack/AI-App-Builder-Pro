@@ -2,7 +2,7 @@
 
 import React from "react"
 import { useBuilderStore } from "@state/builderStore"
-import NodeRenderer from "@components/NodeRenderer"
+import NodeRenderer from "./NodeRenderer"
 
 export default function ComponentTree() {
   const components = useBuilderStore((s) => s.components)

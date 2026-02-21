@@ -1,11 +1,12 @@
+// DeployPanel.tsx
 "use client"
 
-import { useState } from "react"
-import { Button } from "@components/ui/Button"
+import React, { useState } from "react"
+import { Button } from "../../components/ui/Button"
 
 type DeployStatus = "idle" | "exporting" | "pushing" | "deploying" | "success" | "error"
 
-export default function DeployPanel() {
+const DeployPanel: React.FC = () => {
   const [status, setStatus] = useState<DeployStatus>("idle")
   const [logs, setLogs] = useState<string[]>([])
   const [repoUrl, setRepoUrl] = useState<string | null>(null)
@@ -17,23 +18,17 @@ export default function DeployPanel() {
     try {
       setStatus("exporting")
       appendLog("✅ Exporting project snapshot...")
-
-      // 1️⃣ Export + push + deploy
       setStatus("pushing")
       appendLog("📤 Pushing to GitHub...")
 
       const res = await fetch("/api/deploy/vercel", { method: "POST" })
       const data = await res.json()
-
       if (!res.ok) throw new Error(data.error || "Deployment failed")
 
       setRepoUrl(data.repoUrl)
       setLiveUrl(data.liveUrl)
-
       setStatus("success")
       appendLog("🚀 Deployment successful!")
-      appendLog(`GitHub: ${data.repoUrl}`)
-      appendLog(`Live URL: ${data.liveUrl}`)
     } catch (err: any) {
       setStatus("error")
       appendLog(`❌ Error: ${err.message || "Unknown error"}`)
@@ -49,22 +44,15 @@ export default function DeployPanel() {
 
       <div className="bg-black text-white p-2 rounded h-48 overflow-y-auto">
         {logs.map((log, i) => (
-          <div key={i} className="text-sm font-mono">
-            {log}
-          </div>
+          <div key={i} className="text-sm font-mono">{log}</div>
         ))}
       </div>
 
       {status === "success" && liveUrl && (
-        <div className="text-green-600">
-          Live app: <a href={liveUrl} target="_blank" rel="noreferrer">{liveUrl}</a>
-        </div>
-      )}
-      {repoUrl && (
-        <div className="text-blue-600">
-          GitHub Repo: <a href={repoUrl} target="_blank" rel="noreferrer">{repoUrl}</a>
-        </div>
+        <div className="text-green-600">Live app: <a href={liveUrl} target="_blank" rel="noreferrer">{liveUrl}</a></div>
       )}
     </div>
   )
 }
+
+export default DeployPanel

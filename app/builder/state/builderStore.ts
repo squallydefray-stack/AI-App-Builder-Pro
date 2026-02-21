@@ -16,132 +16,85 @@ interface CollaborationState {
 }
 
 interface BuilderStore extends CollaborationState {
-  // Core pages & selection
   pages: BuilderPage[]
   activePageId: string | null
   selectedIds: string[]
   activeBreakpoint: Breakpoint
   dragHandlers: Record<string, any>
 
-  // -------------------------
-  // Page operations
-  // -------------------------
   switchPage: (id: string) => void
   setSchema: (schema: { pages: BuilderPage[] }) => void
-  snapshot: () => void
+  snapshot: () => BuilderPage[]
 
-  // -------------------------
-  // Component operations
-  // -------------------------
   addComponent: (comp: BuilderComponent) => void
   updateComponentProps: (compId: string, props: any, breakpoint?: Breakpoint) => void
   setSelectedIds: (ids: string[]) => void
 
-  // Breakpoint operations
   setActiveBreakpoint: (bp: Breakpoint) => void
 
-  // -------------------------
-  // Collaboration
-  // -------------------------
   initCollaboration?: (collab: CollaborationState) => void
-
-  // Export helpers
   getSnapshotForExport: () => BuilderPage[]
 }
 
 export const useBuilderStore = create<BuilderStore>((set, get) => ({
-  // -------------------------
-  // Core state
-  // -------------------------
   pages: [],
   activePageId: null,
   selectedIds: [],
   activeBreakpoint: "base",
   dragHandlers: {},
 
-  // -------------------------
-  // Page operations
-  // -------------------------
-  switchPage: (id: string) => set({ activePageId: id }),
+  switchPage: (id) => set({ activePageId: id }),
   setSchema: ({ pages }) => set({ pages }),
-  snapshot: () => {
-    const { pages } = get()
-    return JSON.parse(JSON.stringify(pages)) as BuilderPage[]
-  },
+  snapshot: () => JSON.parse(JSON.stringify(get().pages)) as BuilderPage[],
 
-  // -------------------------
-  // Component operations
-  // -------------------------
   addComponent: (comp: BuilderComponent) => {
-    const { pages, activePageId } = get()
+    const { pages, activePageId, activeBreakpoint } = get()
     if (!activePageId) return
+
+    const compWithBP = {
+      ...comp,
+      propsPerBreakpoint: {
+        [activeBreakpoint]: {
+          x: comp.props?.x || 0,
+          y: comp.props?.y || 0,
+          width: comp.props?.width || 200,
+          height: comp.props?.height || 100,
+          ...comp.props,
+        },
+      },
+      children: comp.children || [],
+    }
+
     set({
       pages: pages.map((p) =>
         p.id === activePageId
-          ? { ...p, components: [...p.components, { ...comp, propsPerBreakpoint: { base: comp.props || {} } }] }
+          ? { ...p, components: [...(p.components || []), compWithBP] }
           : p
       ),
     })
   },
 
-    updateComponentProps: (compId: string, props: any, breakpoint?: Breakpoint) => {
-      const bp = breakpoint || get().activeBreakpoint
-      set(
-        produce((state: BuilderStore) => {
-          const updateRecursive = (components: BuilderComponent[]) => {
-            components.forEach((comp) => {
-              if (comp.id === compId) {
-                if (!comp.propsPerBreakpoint) comp.propsPerBreakpoint = {}
-                const existing = comp.propsPerBreakpoint[bp] || {}
-                comp.propsPerBreakpoint[bp] = { ...existing, ...props }
-              }
-              if (comp.children) updateRecursive(comp.children)
-            })
-          }
-          state.pages.forEach((page) => updateRecursive(page.components))
-        })
-      )
-    },
-
-    addComponent: (comp: BuilderComponent) => {
-      const { pages, activePageId, activeBreakpoint } = get()
-      if (!activePageId) return
-      const compWithBP = {
-        ...comp,
-        propsPerBreakpoint: {
-          [activeBreakpoint]: {
-            x: comp.props?.x || 0,
-            y: comp.props?.y || 0,
-            width: comp.props?.width || 200,
-            height: comp.props?.height || 100,
-            ...comp.props,
-          },
-        },
-      }
-      set({
-        pages: pages.map((p) =>
-          p.id === activePageId
-            ? { ...p, components: [...p.components, compWithBP] }
-            : p
-        ),
+  updateComponentProps: (compId, props, breakpoint) => {
+    const bp = breakpoint || get().activeBreakpoint
+    set(
+      produce((state: BuilderStore) => {
+        const updateRecursive = (components: BuilderComponent[]) => {
+          components.forEach((comp) => {
+            if (comp.id === compId) {
+              if (!comp.propsPerBreakpoint) comp.propsPerBreakpoint = {}
+              comp.propsPerBreakpoint[bp] = { ...(comp.propsPerBreakpoint[bp] || {}), ...props }
+            }
+            if (comp.children) updateRecursive(comp.children)
+          })
+        }
+        state.pages.forEach((page) => updateRecursive(page.components || []))
       })
-    },
-
-  setSelectedIds: (ids: string[]) => set({ selectedIds: ids }),
-
-  setActiveBreakpoint: (bp: Breakpoint) => set({ activeBreakpoint: bp }),
-
-  // -------------------------
-  // Collaboration
-  // -------------------------
-  initCollaboration: ({ ydoc, provider, ypages }: CollaborationState) => {
-    set({ ydoc, provider, ypages })
+    )
   },
 
-  // -------------------------
-  // Export helpers
-  // -------------------------
-  getSnapshotForExport: () => {
-    return get().pages
-  },
+  setSelectedIds: (ids) => set({ selectedIds: ids }),
+  setActiveBreakpoint: (bp) => set({ activeBreakpoint: bp }),
+
+  initCollaboration: ({ ydoc, provider, ypages }) => set({ ydoc, provider, ypages }),
+  getSnapshotForExport: () => get().pages,
 }))

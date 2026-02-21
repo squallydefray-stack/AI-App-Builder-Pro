@@ -1,9 +1,9 @@
 // app/builder/pages/ResizerPage.tsx
 "use client"
 import React, { useState } from "react"
-import { useBuilderStore } from "../state/builderStore"
-import NodeRenderer from "../canvas/NodeRenderer"
-import { ResizerOverlay } from "../canvas/ResizerOverlay"
+import { useBuilderStore } from "@/state/builderStore"
+import NodeRenderer from "./NodeRenderer"
+import { ResizerOverlay } from "@/canvas/ResizerOverlay"
 
 export default function ResizerPage() {
   const pages = useBuilderStore((s) => s.pages)

@@ -9,7 +9,7 @@
 "use client"
 
 import { exportNextJSApp } from "../../../lib/exporter/nextjsExporter"
-import { useBuilderStore } from "../state/builderStore"
+import { useBuilderStore } from "@/state/builderStore"
 import { normalizeComponents } from "../../../lib/exporter/normalizer"
 
 export default function ExportPage() {

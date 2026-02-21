@@ -1,4 +1,4 @@
-import { BuilderComponent } from "../../lib/exporter/schema"
+import { BuilderComponent } from "@lib/exporter/schema"
 
 export function findComponentById(
   components: BuilderComponent[],

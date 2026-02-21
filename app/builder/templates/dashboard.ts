@@ -6,7 +6,7 @@
 //
 
 
-import { BuilderPage } from "../state/builderStore"
+import { BuilderPage } from "@/state/builderStore"
 
 export const dashboardTemplate: BuilderPage[] = [
   {

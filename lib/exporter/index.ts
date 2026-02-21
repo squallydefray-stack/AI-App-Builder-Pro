@@ -6,7 +6,7 @@
 //
 
 
-import { BuilderSchema } from "./schema"
+import { BuilderSchema } from "@lib/exporter/schema"
 
 export function exportProject(schema: BuilderSchema) {
   return schema

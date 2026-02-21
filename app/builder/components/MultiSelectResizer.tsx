@@ -9,7 +9,7 @@
 "use client"
 
 import React, { useRef, useState, useEffect, useCallback } from "react"
-import { useBuilderStore } from "../state/builderStore"
+import { useBuilderStore } from "@/state/builderStore"
 import { BuilderComponent } from "@lib/exporter/schema"
 import { applyConstraints } from "@/lib/utils/constraintSolver"
 import { motion } from "framer-motion"

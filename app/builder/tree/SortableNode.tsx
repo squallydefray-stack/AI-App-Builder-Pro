@@ -4,7 +4,7 @@
 import React from "react"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { useBuilderStore } from "../state/builderStore"
+import { useBuilderStore } from "@/state/builderStore"
 
 type SortableNodeProps = {
   id: string

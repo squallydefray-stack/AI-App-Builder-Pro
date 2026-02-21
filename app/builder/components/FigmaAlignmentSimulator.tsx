@@ -9,7 +9,7 @@
 "use client"
 
 import React, { useRef, useState, useEffect, useCallback } from "react"
-import { useBuilderStore } from "../state/builderStore"
+import { useBuilderStore } from "@/state/builderStore"
 import { BuilderSchema, BuilderComponent } from "@lib/exporter/schema"
 import { convertToNextTailwind, convertToReactNative } from "@/lib/exporter/codeGenerator"
 import ExportFeedbackPanel from "./ExportFeedbackPanel"

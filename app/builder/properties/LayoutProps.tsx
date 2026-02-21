@@ -10,7 +10,7 @@
 
 import React from "react"
 import { BuilderComponent } from "../../lib/exporter/schema"
-import PropsInspector from "../components/PropsInspector"
+import PropsInspector from "@builderComponents/PropsInspector"
 
 type LayoutPropsProps = { component: BuilderComponent }
 

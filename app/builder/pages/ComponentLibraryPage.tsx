@@ -10,10 +10,10 @@
 "use client"
 
 import React from "react"
-import Canvas from "../canvas/Canvas"
-import InspectorPanel from "../components/InspectorPanel"
-import { useBuilderStore } from "../state/builderStore"
-import ComponentPanel from "../components/ComponentPanel"
+import Canvas from "@/canvas/Canvas"
+import InspectorPanel from "@builderComponents/InspectorPanel"
+import { useBuilderStore } from "@/state/builderStore"
+import ComponentPanel from "@builderComponents/ComponentPanel"
 
 export default function ComponentLibraryPage() {
   const { undo, redo } = useBuilderStore()

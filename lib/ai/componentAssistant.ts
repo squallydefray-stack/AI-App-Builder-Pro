@@ -1,5 +1,5 @@
 // lib/ai/componentAssistant.ts
-import { BuilderComponent, Breakpoint } from "../exporter/schema"
+import { BuilderComponent, Breakpoint } from "@lib/exporter/schema"
 import { nanoid } from "nanoid"
 import OpenAI from "openai"
 

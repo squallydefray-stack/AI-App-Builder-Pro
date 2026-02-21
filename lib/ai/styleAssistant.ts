@@ -2,7 +2,7 @@
 // AI App Builder Pro
 // Production AI style suggestion engine
 
-import { BuilderComponent } from "../exporter/schema"
+import { BuilderComponent } from "@lib/exporter/schema"
 
 export type Breakpoint = "desktop" | "tablet" | "mobile"
 

@@ -1,5 +1,5 @@
 // utils.ts
-import { BuilderComponent } from "../../lib/exporter/schema"
+import { BuilderComponent } from "@/lib/exporter/schema"
 
 /**
  * Recursively ensures all component IDs are unique

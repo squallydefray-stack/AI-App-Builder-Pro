@@ -1,6 +1,6 @@
 // lib/ai/sectionGenerator.ts
 
-import { BuilderComponent } from "../exporter/schema"
+import { BuilderComponent } from "@lib/exporter/schema"
 import { v4 as uuid } from "uuid"
 
 export function generateHeroSection(): BuilderComponent {

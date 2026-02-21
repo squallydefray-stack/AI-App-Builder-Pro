@@ -8,7 +8,7 @@
 
 "use client"
 import React, { useState } from "react"
-import { useBuilderStore } from "../state/builderStore"
+import { useBuilderStore } from "@/state/builderStore"
 import { generateAppFiles } from "@/lib/exporter/generateAppFiles"
 import { createZipFromFiles } from "@/lib/exporter/browserZipHelper"
 

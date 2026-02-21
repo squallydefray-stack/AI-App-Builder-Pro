@@ -9,7 +9,8 @@
 // lib/exporter/codeExporter.ts
 import fs from "fs"
 import path from "path"
-import { BuilderSchema, BuilderPage, BuilderComponent } from "./schema"
+import { BuilderSchema, BuilderPage, BuilderComponent } from "@lib/exporter/schema"
+
 
 interface ExportOptions {
   outputDir: string

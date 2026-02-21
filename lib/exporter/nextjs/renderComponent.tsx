@@ -1,4 +1,4 @@
-import { BuilderComponent } from "../schema"
+import { BuilderSchema } from "@lib/exporter/schema"
 import { indent } from "../utils"
 
 export function renderNextComponent(c: BuilderComponent): string {

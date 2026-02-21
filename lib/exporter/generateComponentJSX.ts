@@ -6,7 +6,7 @@
 //
 
 
-import { BuilderComponent, Breakpoint } from "./schema"
+import { BuilderComponent, Breakpoint } from "@lib/exporter/schema"
 
 function mapStyleToTailwind(style: Record<string, any>): string {
   if (!style) return ""

@@ -1,8 +1,8 @@
 "use client"
 
 import React from "react"
-import { useBuilderStore } from "../state/builderStore"
-import { BuilderComponent } from "../../../lib/exporter/schema"
+import { useBuilderStore } from "@/state/builderStore"
+import { BuilderComponent } from "@lib/exporter/schema"
 
 type TreeNodeProps = {
   node: BuilderComponent

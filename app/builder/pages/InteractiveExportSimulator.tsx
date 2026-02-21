@@ -9,14 +9,14 @@
 "use client"
 
 import React, { useState, useMemo, useCallback } from "react"
-import { useBuilderStore } from "../state/builderStore"
-import NodeRenderer from "../canvas/NodeRenderer"
+import { useBuilderStore } from "@/state/builderStore"
+import NodeRenderer from "./NodeRenderer"
 import ExportPage from "./ExportPage"
 import { BuilderComponent } from "@lib/exporter/schema"
 import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { arrayMove } from "@dnd-kit/sortable"
-import ResizeHandles from "../canvas/ResizeHandles"
+import ResizeHandles from "@/canvas/ResizeHandles"
 
 // ===============================
 // Helper: AutoLayout & Fill/Hug Feedback

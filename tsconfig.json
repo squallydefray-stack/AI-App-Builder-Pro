@@ -14,24 +14,28 @@
     "jsx": "preserve",
     "incremental": true,
     "forceConsistentCasingInFileNames": true,
-    "plugins": [
-      { "name": "next" }
-    ],
-
+    "plugins": [{ "name": "next" }],
     "baseUrl": ".",
     "paths": {
       "@/*": ["app/*"],
       "@lib/*": ["lib/*"],
       "@components/*": ["components/*"],
+
+      // Builder aliases
       "@builder/*": ["builder/*"],
       "@builderComponents/*": ["builder/components/*"],
-      "@properties/*": ["builder/properties/*"],
-      "@state/*": ["builder/state/*"],
       "@canvas/*": ["builder/canvas/*"],
-      "@store/*": ["builder/store/*"],
+      "@state/*": ["builder/store/*"],
+      "@properties/*": ["builder/properties/*"],
+
+      // AI & export
       "@ai/*": ["ai/*"],
       "@export/*": ["export/*"],
+
+      // Server
       "@server/*": ["server/*"],
+
+      // Plugins
       "@plugins/*": ["plugins/*"]
     }
   },

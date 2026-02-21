@@ -12,8 +12,8 @@
 import React from "react"
 import { motion } from "framer-motion"
 import { BuilderComponent } from "@lib/exporter/schema"
-import { useBuilderStore } from "../state/builderStore"
-import { DropZone, useCanvasDropContext } from "./DropZone"
+import { useBuilderStore } from "@/state/builderStore"
+import { DropZone, useCanvasDropContext } from "@builderComponents/DropZone"
 
 interface DraggableNodeProps {
   component: BuilderComponent

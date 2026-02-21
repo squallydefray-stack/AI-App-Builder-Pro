@@ -1,4 +1,4 @@
-import { BuilderPage } from "@/app/builder/state/builderStore"
+import { BuilderPage } from "@/state/builderStore"
 
 export function generateNavigation(pages: BuilderPage[]): string {
   const links = pages

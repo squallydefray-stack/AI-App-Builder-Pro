@@ -10,9 +10,9 @@
 "use client"
 
 import React from "react"
-import Canvas from "../canvas/Canvas"
-import InspectorPanel from "../components/InspectorPanel"
-import { useBuilderStore } from "../state/builderStore"
+import Canvas from "@/canvas/Canvas"
+import InspectorPanel from "@builderComponents/InspectorPanel"
+import { useBuilderStore } from "@/state/builderStore"
 
 export default function PageTreePage() {
   const { pages, activePageId, setSchema, undo, redo } = useBuilderStore()

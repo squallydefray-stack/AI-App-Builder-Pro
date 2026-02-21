@@ -1,6 +1,6 @@
 import { v4 as uuid } from "uuid"
 import { AINode } from "./aiSchema"
-import { BuilderComponent } from "../exporter/schema"
+import { BuilderComponent } from "@lib/exporter/schema"
 
 export function normalizeNodes(nodes: AINode[]): BuilderComponent[] {
   function walk(node: AINode): BuilderComponent {

@@ -7,7 +7,7 @@
 
 
 // app/builder/components/AISuggestionsPanel.tsx
-import { useBuilderStore } from "../state/builderStore";
+import { useBuilderStore } from "@/state/builderStore";
 import { analyzeLayout } from "@lib/ai/layoutEngine";
 
 export const AISuggestionsPanel: React.FC = () => {

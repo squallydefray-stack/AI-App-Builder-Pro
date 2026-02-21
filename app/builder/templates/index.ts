@@ -1,6 +1,6 @@
 // app/builder/templates/index.ts
 
-import { BuilderPage } from "../state/builderStore"
+import { BuilderPage } from "@/state/builderStore"
 
 export type Template = {
   id: string

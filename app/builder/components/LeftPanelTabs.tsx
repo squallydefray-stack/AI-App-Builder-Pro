@@ -10,7 +10,7 @@
 
 import React, { useState } from "react"
 import PageTree from "./PageTree"
-import ComponentPanel from "./ComponentPanel"
+import ComponentPanel from "@builderComponents/ComponentPanel"
 
 export default function LeftPanelTabs() {
   const [activeTab, setActiveTab] = useState<"pages" | "components">("pages")

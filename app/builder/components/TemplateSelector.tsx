@@ -9,7 +9,7 @@
 "use client"
 
 import { templates } from "../templates"
-import { useBuilderStore } from "../state/builderStore"
+import { useBuilderStore } from "@/state/builderStore"
 
 export default function TemplateSelector() {
   const loadTemplate = useBuilderStore((s) => s.loadTemplate)

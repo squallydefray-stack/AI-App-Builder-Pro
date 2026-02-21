@@ -1,7 +1,7 @@
 // app/api/github/export-to-github/route.ts
 import { NextRequest, NextResponse } from "next/server"
 import { exportAndPushToGit } from "@/lib/exporter/exporterAPI"
-import { BuilderPage } from "@/builder/state/builderStore"
+import { BuilderPage } from "@/state/builderStore"
 
 export async function POST(req: NextRequest) {
   try {

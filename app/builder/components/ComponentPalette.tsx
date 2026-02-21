@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useEffect } from "react"
 import { BuilderComponent } from "@/lib/exporter/schema"
-import NodeRenderer from "@components/NodeRenderer"
+import NodeRenderer from "./NodeRenderer"
 
 interface ComponentPaletteProps {
   components: BuilderComponent[]

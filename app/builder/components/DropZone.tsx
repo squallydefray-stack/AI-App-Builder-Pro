@@ -4,7 +4,7 @@
 import React, { useRef, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { BuilderComponent } from "@lib/exporter/schema"
-import { useBuilderStore } from "../state/builderStore"
+import { useBuilderStore } from "@/state/builderStore"
 
 interface DropZoneProps {
   id: string

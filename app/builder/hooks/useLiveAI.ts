@@ -8,7 +8,7 @@
 
 // app/builder/hooks/useLiveAI.ts
 import { useEffect, useRef } from "react";
-import { useBuilderStore } from "../state/builderStore";
+import { useBuilderStore } from "@/state/builderStore";
 import { analyzeLayout } from "@lib/ai/layoutEngine";
 import { BuilderComponent } from "@lib/exporter/schema";
 

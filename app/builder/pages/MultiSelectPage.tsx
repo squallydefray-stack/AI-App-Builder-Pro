@@ -10,10 +10,10 @@
 "use client"
 
 import React, { useEffect } from "react"
-import Canvas from "../canvas/Canvas"
-import InspectorPanel from "../components/InspectorPanel"
-import ComponentPanel from "../components/ComponentPanel"
-import { useBuilderStore } from "../state/builderStore"
+import Canvas from "@/canvas/Canvas"
+import InspectorPanel from "@builderComponents/InspectorPanel"
+import ComponentPanel from "@builderComponents/ComponentPanel"
+import { useBuilderStore } from "@/state/builderStore"
 
 export default function MultiSelectPage() {
   const {

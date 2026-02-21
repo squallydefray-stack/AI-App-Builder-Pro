@@ -10,9 +10,9 @@
 "use client"
 
 import React, { useState } from "react"
-import Canvas from "../canvas/Canvas"
-import InspectorPanel from "../components/InspectorPanel"
-import { useBuilderStore } from "../state/builderStore"
+import Canvas from "@/canvas/Canvas"
+import InspectorPanel from "@builderComponents/InspectorPanel"
+import { useBuilderStore } from "@/state/builderStore"
 
 export default function GridGuidesPage() {
   const { undo, redo } = useBuilderStore()

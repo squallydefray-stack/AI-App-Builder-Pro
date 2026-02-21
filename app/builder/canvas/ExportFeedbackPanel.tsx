@@ -11,7 +11,7 @@
 import React, { useState, useEffect } from "react"
 import { BuilderSchema } from "@lib/exporter/schema"
 import { pushToGitHub } from "@/lib/exporter/githubPush" // your server/API wrapper
-import { useBuilderStore } from "../state/builderStore"
+import { useBuilderStore } from "@/state/builderStore"
 
 interface ExportFeedbackPanelProps {
   liveCode: string

@@ -1,8 +1,8 @@
 // app/builder/pages/AutoLayoutPage.tsx
 "use client"
 import React from "react"
-import NodeRenderer from "../canvas/NodeRenderer"
-import { useBuilderStore } from "../state/builderStore"
+import NodeRenderer from "./NodeRenderer"
+import { useBuilderStore } from "@/state/builderStore"
 
 export default function AutoLayoutPage() {
   const pages = useBuilderStore((s) => s.pages)

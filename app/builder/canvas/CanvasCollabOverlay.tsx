@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
-import { useBuilderStore } from "../state/builderStore"
+import { useBuilderStore } from "@/state/builderStore"
 
 export const CanvasCollabOverlay = () => {
   const collabHighlights = useBuilderStore((s) => s.collabHighlights)

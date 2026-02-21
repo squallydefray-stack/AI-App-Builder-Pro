@@ -1,4 +1,4 @@
-import { BuilderComponent } from "../schema"
+import { BuilderSchema } from "@lib/exporter/schema"
 
 export function renderRNComponent(c: BuilderComponent): string {
   const p = c.props.base

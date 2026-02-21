@@ -4,7 +4,7 @@
 import React from "react"
 import PageTree from "./pageTree"        // PageTree for page management
 import Canvas from "@builder/canvas/Canvas"
-import InspectorPanel from "@builder/components/InspectorPanel"
+import InspectorPanel from "@builderComponents/InspectorPanel"
 
 export default function BuilderWorkspaceUI() {
   return (

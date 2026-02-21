@@ -5,7 +5,7 @@
 
 import { io, Socket } from 'socket.io-client';
 import { useEffect } from 'react';
-import { useBuilderStore } from './store';
+import { useBuilderStore } from "@state/builderStore"
 
 
 let socket: Socket;

@@ -9,7 +9,7 @@
 // lib/utils/AIAutopilot.ts
 "use client"
 
-import { BuilderComponent, BuilderPage } from "../exporter/schema"
+import { BuilderComponent, BuilderPage } from "@lib/exporter/schema"
 import { useBuilderStore } from "@builder/state/builderStore"
 
 /**

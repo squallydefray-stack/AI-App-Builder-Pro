@@ -20,7 +20,7 @@ import {
   MeasuringStrategy,
 } from "@dnd-kit/core"
 import { AnimatePresence, motion } from "framer-motion"
-import { useBuilderStore } from "../state/builderStore"
+import { useBuilderStore } from "@/state/builderStore"
 import NodeRenderer from "./NodeRenderer"
 import MultiSelectResizer from "./MultiSelectResizer"
 import ExportFeedbackPanel from "./ExportFeedbackPanel"

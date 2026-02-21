@@ -1,10 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { useBuilderStore } from "@/app/builder/state/builderStore"
 import { exportToZip } from "./exportToZip"
 import { generateAppFiles } from "@/lib/exporter/generateAppFiles"
-import { useBuilderStore } from "@/app/builder/state/builderStore"
+import { useBuilderStore } from "@/state/builderStore"
 
 // Inside ExportModal component:
 <button

@@ -3,7 +3,7 @@
 
 import path from "path"
 import { promises as fs } from "fs"
-import { BuilderPage, BuilderComponent } from "./schema"
+import { BuilderPage, BuilderComponent } from "@lib/exporter/schema"
 import { pushToGitHub } from "./exporterGit"
 
 // -------------------------

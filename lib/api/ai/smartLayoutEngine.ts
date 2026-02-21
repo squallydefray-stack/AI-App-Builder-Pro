@@ -7,7 +7,7 @@
 
 
 // lib/ai/smartLayoutEngine.ts
-import { BuilderComponent, LayoutConfig, ResponsiveProps } from "../exporter/schema"
+import { BuilderComponent, LayoutConfig, ResponsiveProps } from "@lib/exporter/schema"
 
 export function autoSnapLayout(components: BuilderComponent[], parentWidth = 1200): BuilderComponent[] {
   const spacing = 16

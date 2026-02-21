@@ -2,7 +2,7 @@
 "use client"
 
 import React from "react"
-import { useBuilderStore } from "../state/builderStore"
+import { useBuilderStore } from "@/state/builderStore"
 
 export default function Toolbar() {
   const {

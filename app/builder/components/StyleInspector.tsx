@@ -9,7 +9,7 @@
 "use client"
 
 import React from "react"
-import { useBuilderStore } from "../state/builderStore"
+import { useBuilderStore } from "@/state/builderStore"
 import StyleInspector from "./inspector/StyleInspector"
 
 export default function InspectorPanel() {

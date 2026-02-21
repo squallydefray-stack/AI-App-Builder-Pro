@@ -1,4 +1,4 @@
-import { BuilderSchema } from "../schema"
+import { BuilderSchema } from "@lib/exporter/schema"
 import { renderRNComponent } from "./renderComponent"
 
 export function generateReactNative(schema: BuilderSchema) {

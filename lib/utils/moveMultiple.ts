@@ -6,7 +6,7 @@
 //
 
 
-import { BuilderComponent } from "../exporter/schema"
+import { BuilderComponent } from "@lib/exporter/schema"
 import { moveNode } from "./treeHelper"
 
 export function moveMultiple(

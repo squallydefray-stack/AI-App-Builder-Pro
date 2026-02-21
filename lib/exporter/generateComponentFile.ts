@@ -1,4 +1,4 @@
-import { BuilderComponent } from "./schema"
+import { BuilderSchema } from "@lib/exporter/schema"
 import { styleToTailwind } from "./styleToTailwind"
 import { camelToKebab } from "./generateComponentJSX"
 

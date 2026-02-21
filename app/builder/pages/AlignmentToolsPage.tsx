@@ -1,8 +1,8 @@
 // app/builder/pages/AlignmentToolsPage.tsx
 "use client"
 import React from "react"
-import { useBuilderStore } from "../state/builderStore"
-import NodeRenderer from "../canvas/NodeRenderer"
+import { useBuilderStore } from "@/state/builderStore"
+import NodeRenderer from "./NodeRenderer"
 import { applyAlignment } from "../lib/alignmentTools"
 
 export default function AlignmentToolsPage() {

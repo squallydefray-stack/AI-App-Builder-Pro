@@ -8,7 +8,7 @@
 
 // lib/drag/dropRules.ts
 
-import { BuilderComponent } from "../exporter/schema"
+import { BuilderComponent } from "@lib/exporter/schema"
 
 export function canDrop(
   parent: BuilderComponent,

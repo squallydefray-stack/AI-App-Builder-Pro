@@ -10,7 +10,7 @@
 "use client"
 
 import React from "react"
-import { useBuilderStore } from "../../state/builderStore"
+import { useBuilderStore } from "@/state/builderStore"
 
 export default function PageSwitcher() {
   const pages = useBuilderStore((s) => s.pages)

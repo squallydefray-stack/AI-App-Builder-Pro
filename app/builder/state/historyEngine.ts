@@ -8,7 +8,7 @@
 
 // historyEngine.ts
 
-import { BuilderComponent } from "../../../lib/exporter/schema"
+import { BuilderComponent } from "@lib/exporter/schema"
 
 export type HistoryState = {
   past: BuilderComponent[][]

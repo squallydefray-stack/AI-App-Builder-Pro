@@ -8,7 +8,7 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { useBuilderStore } from "../state/builderStore"
+import { useBuilderStore } from "@/state/builderStore"
 import NodeRenderer from "./NodeRenderer"
 import { BuilderComponent } from "@lib/exporter/schema"
 import { motion, AnimatePresence } from "framer-motion"

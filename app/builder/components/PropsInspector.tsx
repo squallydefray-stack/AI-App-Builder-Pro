@@ -6,7 +6,7 @@
 
 import React, { useState, useEffect } from "react"
 import { BuilderComponent } from "../../lib/exporter/schema"
-import { useBuilderStore, Breakpoint } from "../state/builderStore"
+import { useBuilderStore, Breakpoint } from "@/state/builderStore"
 
 type PropsInspectorProps = {
   component: BuilderComponent

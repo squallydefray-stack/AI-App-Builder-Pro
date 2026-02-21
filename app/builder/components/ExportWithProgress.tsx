@@ -9,7 +9,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { useBuilderStore } from "../state/builderStore"
+import { useBuilderStore } from "@/state/builderStore"
 
 export default function ExportWithProgress() {
   const { pages } = useBuilderStore()   // includes all responsive props

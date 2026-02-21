@@ -1,4 +1,4 @@
-import { BuilderComponent } from "../../lib/exporter/schema"
+import { BuilderComponent } from "@lib/exporter/schema"
 
 // Find a component recursively
 export function findComponent(

@@ -8,7 +8,7 @@
 
 // app/builder/utils/AIAutopilot.ts
 import { BuilderComponent, BuilderPage } from "@lib/exporter/schema"
-import { useBuilderStore } from "@builder/state/builderStore"
+import { useBuilderStore } from "@/state/builderStore"
 
 /**
  * Converts structured AI plan into BuilderPages & Components

@@ -6,7 +6,7 @@
 //
 
 
-import { BuilderComponent } from "@/app/builder/state/builderStore"
+import { BuilderComponent } from "@/state/builderStore"
 
 export function generateJSX(
   node: BuilderComponent

@@ -9,7 +9,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { useBuilderStore } from "../state/builderStore"
+import { useBuilderStore } from "@/state/builderStore"
 import { BuilderSchema, BuilderComponent } from "@lib/exporter/schema"
 import fs from "fs"
 import path from "path"

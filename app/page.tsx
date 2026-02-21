@@ -1,17 +1,10 @@
 // app/page.tsx
 
-import {
-  deployFromBuilder,
-  getDeploymentStatus,
-  fetchDeploymentHistory,
-} from "../lib/deploy";
-import { runOnboarding } from "../lib/onboarding";
+"use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion"; 
 import Confetti from "react-confetti";
-
-"use client";
 
 interface Deployment {
   id: string;

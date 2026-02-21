@@ -9,7 +9,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { useBuilderStore } from "@/app/builder/state/builderStore"
+import { useBuilderStore } from "@/state/builderStore"
 
 export const ExportGitHubButton: React.FC = () => {
   const pages = useBuilderStore((state) => state.pages)

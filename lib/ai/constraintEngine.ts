@@ -1,4 +1,4 @@
-import { BuilderComponent } from "../exporter/schema"
+import { BuilderComponent } from "@lib/exporter/schema"
 
 export function applyConstraints(
   parent: BuilderComponent

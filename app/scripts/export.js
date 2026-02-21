@@ -18,7 +18,7 @@
 import path from "path"
 import fs from "fs/promises"
 import { exportToNextJS, exportToReactNative } from "../lib/exporter/exporterAPI.js"
-import { useBuilderStore } from "../app/builder/state/builderStore.js"
+import { useBuilderStore } from "@/state/builderStore.js"
 
 async function main() {
   const platform = process.argv[2] || "nextjs"

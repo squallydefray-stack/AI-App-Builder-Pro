@@ -1,5 +1,5 @@
 // lib/ai/layoutGenerator.ts
-import { BuilderPage, BuilderComponent } from "../exporter/schema"
+import { BuilderPage, BuilderComponent } from "@lib/exporter/schema"
 import { analyzeLayout, autoLayoutSchema } from "./layoutEngine"
 
 /**

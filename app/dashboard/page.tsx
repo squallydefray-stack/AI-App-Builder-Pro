@@ -1,40 +1,48 @@
 // app/dashboard/page.tsx
-
 "use client"
 
-import React from "react"
-import Canvas from "@builder/canvas/Canvas"
-import PageTree from "@builder/tree/TreeView"
-import InspectorPanel from "@builder/components/InspectorPanel"
+import React, { useEffect, useState } from "react"
+import { useBuilderStore } from "@store/builderStore"
+import { BuilderCanvas } from "@canvas/Canvas"
+import PageTree from "@builderComponents/TreeView"
+import InspectorPanel from "@builderComponents/InspectorPanel"
 import AIDeployPanel from "@components/AIDeployPanel"
-import DeployPanel from "@builder/components/DeployPanel"
-
+import DeployPanel from "@builderComponents/DeployPanel"
+import { runDeployment } from "@lib/deploy"
 
 export default function DashboardPage() {
-    const handleDeploy = async () => {
-      setLogs([])
-      setStatus("running")
+  const { activePageId, pages } = useBuilderStore()
+  const [user, setUser] = useState<any>(null)
+  const [logs, setLogs] = useState<string[]>([])
+  const [status, setStatus] = useState<"idle" | "running" | "complete">("idle")
+  const [deployResult, setDeployResult] = useState<any>(null)
 
-      const result = await runDeployment(activeProjectId, (msg) => {
-        setLogs(prev => [...prev, msg])
-      })
+  useEffect(() => {
+    // Example: fetch user info from session or supabase
+    setUser({ id: "demo-user" })
+  }, [])
 
-      setDeployResult(result)
-      setStatus("complete")
-    }
-    useEffect(() => {
-      if (!user) return
+  useEffect(() => {
+    if (!user) return
+    fetch("/api/onboarding", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user }),
+    })
+  }, [user])
 
-      fetch("/api/onboarding", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user }),
-      })
-    }, [user])
-    
+  const activePage = pages.find((p) => p.id === activePageId)
+
+  const handleDeploy = async () => {
+    setLogs([])
+    setStatus("running")
+    const result = await runDeployment(activePageId!, (msg: string) => setLogs((prev) => [...prev, msg]))
+    setDeployResult(result)
+    setStatus("complete")
+  }
+
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
-
       {/* -------------------------
           Left Sidebar: Page Tree
       ------------------------- */}
@@ -47,20 +55,21 @@ export default function DashboardPage() {
           Center Workspace: Canvas
       ------------------------- */}
       <main className="flex-1 relative bg-gray-100 overflow-auto">
-        <Canvas />
+        {activePage ? <BuilderCanvas builderSchema={{ pages }} /> : <div>Loading...</div>}
       </main>
 
       {/* -------------------------
           Right Sidebar: Inspector + AI Deploy
       ------------------------- */}
       <aside className="w-80 border-l bg-white overflow-y-auto p-4 flex flex-col space-y-6">
-          <div className="p-6 space-y-6">
-            <h1 className="text-2xl font-bold">Dashboard</h1>
-        <DeployPanel />
-        <InspectorPanel />
-        <AIDeployPanel />
-      </aside>
+        <div className="p-6 space-y-6">
+          <h1 className="text-2xl font-bold">Dashboard</h1>
 
+          <DeployPanel />
+          <InspectorPanel />
+          <AIDeployPanel />
+        </div>
+      </aside>
     </div>
   )
 }

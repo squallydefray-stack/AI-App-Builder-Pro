@@ -13,7 +13,7 @@ import Collapsible from "../ui/Collapsible"
 import TokenSelect from "../ui/TokenSelect"
 import { fontSizeTokens } from "@lib/design/tokens"
 import { BuilderComponent, Breakpoint } from "@lib/exporter/schema"
-import { useBuilderStore } from "../../../state/builderStore"
+import { useBuilderStore } from "@/state/builderStore"
 
 interface Props {
   component: BuilderComponent

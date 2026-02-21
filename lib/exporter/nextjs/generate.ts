@@ -1,4 +1,4 @@
-import { BuilderSchema } from "../schema"
+import { BuilderSchema } from "@lib/exporter/schema"
 import { renderNextComponent } from "./renderComponent"
 
 export function generateNextApp(schema: BuilderSchema) {

@@ -2,7 +2,7 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { useBuilderStore } from "@/builder/state/builderStore"
+import { useBuilderStore } from "@/state/builderStore"
 import { exportToGithub } from "@/app/api/export/github/route"
 
 export default function ExportPanel() {

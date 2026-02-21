@@ -1,4 +1,4 @@
-import PropsInspector from "./PropsInspector"
+import PropsInspector from "@builderComponents/PropsInspector"
 
 export default function BuilderDemo() {
   const [currentBreakpoint, setCurrentBreakpoint] = useState<"desktop" | "tablet" | "mobile">("desktop")

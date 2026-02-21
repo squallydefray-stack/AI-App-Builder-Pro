@@ -2,7 +2,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { useBuilderStore } from "@/builder/state/builderStore"
+import { useBuilderStore } from "@/state/builderStore"
 
 export default function PageTabs() {
   const pages = useBuilderStore((s) => s.pages)

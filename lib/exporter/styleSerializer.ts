@@ -1,5 +1,5 @@
 // lib/exporter/styleSerializer.ts
-import { BuilderComponent, Breakpoint } from "./schema"
+import { BuilderComponent, Breakpoint } from "@lib/exporter/schema"
 
 export function serializeStyles(
   props: Record<string, any>,

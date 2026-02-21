@@ -6,7 +6,7 @@
 //
 
 
-import { BuilderPage } from "@/app/builder/state/builderStore"
+import { BuilderPage } from "@/state/builderStore"
 import { generateComponentTree } from "./generateComponent"
 
 export function generatePageCode(page: BuilderPage, allPages: BuilderPage[]) {

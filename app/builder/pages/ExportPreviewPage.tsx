@@ -9,8 +9,8 @@
 "use client"
 
 import React, { useState, useMemo } from "react"
-import { useBuilderStore } from "../state/builderStore"
-import NodeRenderer from "../canvas/NodeRenderer"
+import { useBuilderStore } from "@/state/builderStore"
+import NodeRenderer from "./NodeRenderer"
 import { BuilderComponent } from "@lib/exporter/schema"
 import ExportPage from "./ExportPage"
 

@@ -1,7 +1,6 @@
 // lib/utils/treeHelper.ts
 
-import { BuilderComponent } from "../exporter/schema"
-
+import { BuilderComponent } from "@lib/exporter/schema"
 /* =========================
    FLATTEN TREE
 ========================= */

@@ -3,7 +3,7 @@
 "use client"
 
 import React from "react"
-import { useBuilderStore } from "../state/builderStore"
+import { useBuilderStore } from "@/state/builderStore"
 import { BuilderPage } from "@lib/exporter/schema"
 import { v4 as uuidv4 } from "uuid"
 

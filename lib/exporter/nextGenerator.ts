@@ -1,4 +1,4 @@
-import { BuilderSchema, BuilderComponent } from "./schema"
+import { BuilderSchema, BuilderComponent } from "@lib/exporter/schema"
 
 export function generateNextJS(schema: BuilderSchema) {
   const files: Record<string, string> = {}

@@ -1,6 +1,6 @@
 "use client"
 
-import { useBuilderStore } from "../state/builderStore"
+import { useBuilderStore } from "@/state/builderStore"
 
 const breakpoints = [
   { id: "desktop", label: "Desktop", width: "100%" },
