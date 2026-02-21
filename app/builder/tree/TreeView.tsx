@@ -14,9 +14,9 @@ import {
 } from "@dnd-kit/core"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { useBuilderStore } from "@/state/builderStore"
-import { flattenComponents } from "../../../lib/utils/treeHelper"
+import { flattenComponents } from "@lib/utils/treeHelper"
 import NodeRenderer from "./NodeRenderer"
-import DropZone from "@builderComponents/DropZone"
+import DropZone from "@components/DropZone"
 
 export default function TreeView() {
   const components = useBuilderStore((s) => s.components) || []
