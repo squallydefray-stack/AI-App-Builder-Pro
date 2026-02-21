@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-
   "scripts": {
     "validate-env": "node scripts/validateEnv.mjs",
     "dev": "concurrently \"npm:dev:collab\"",
@@ -26,6 +25,7 @@
     "dotenv": "^17.3.1",
     "file-saver": "^2.0.5",
     "framer-motion": "^12.34.3",
+    "glob": "^11.0.0",
     "html2canvas": "^1.4.1",
     "immer": "^11.1.4",
     "jszip": "^3.10.1",
@@ -43,19 +43,19 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^3.4.0",
+    "@tailwindcss/postcss": "^4.0.0",
     "@types/node": "^20.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@typescript-eslint/eslint-plugin": "^8.56.0",
     "@typescript-eslint/parser": "^8.56.0",
     "concurrently": "^8.2.2",
-    "eslint": "^9.39.0",
+    "eslint": "^10.0.0",
     "eslint-config-next": "^16.1.6",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
-    "eslint-plugin-tailwindcss": "^3.18.2",
-    "tailwindcss": "^3.4.0",
+    "eslint-plugin-tailwindcss": "^3.18.0",
+    "tailwindcss": "^4.2.0",
     "typescript": "^5.0.0",
     "y-websocket": "^3.0.0"
   },
