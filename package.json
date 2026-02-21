@@ -1,8 +1,9 @@
 {
   "name": "ai-app-builder",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
+ 
   "scripts": {
     "validate-env": "node scripts/validateEnv.mjs",
     "dev": "concurrently \"npm:dev:collab\"",
@@ -42,29 +43,22 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.0",
     "@types/node": "^20.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@typescript-eslint/eslint-plugin": "^8.56.0",
     "@typescript-eslint/parser": "^8.56.0",
-    "autoprefixer": "^10.4.14",
     "concurrently": "^8.2.2",
-    "eslint": "^9.39.2",
+    "eslint": "^10.0.0",
     "eslint-config-next": "^16.1.6",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
-    "eslint-plugin-tailwindcss": "^3.13.0",
-    "postcss": "^8.4.33",
-    "tailwindcss": "^4.2.0",
+    "eslint-plugin-tailwindcss": "^3.18.2",
+    "tailwindcss": "^4.0.0",
     "typescript": "^5.0.0",
     "y-websocket": "^3.0.0"
   },
-  "description": "Visual AI-powered app builder using Next.js, React Native export, and GitHub automation.",
-  "keywords": [],
-  "author": "",
+   "description": "Visual AI-powered app builder using Next.js, React Native export, and GitHub automation.",
   "license": "ISC"
- },
-  "engines": {
-    "node": "18.x"
-  }
 }
