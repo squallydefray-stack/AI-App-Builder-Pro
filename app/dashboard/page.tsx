@@ -11,7 +11,11 @@ import { runDeployment } from "@lib/deploy"
 import { useBuilderStore } from "@state/builderStore"
 import { BuilderInspector } from "@components/InspectorPanel"
 
-export default function DashboardPage() {
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const supabase = createSupabaseServer()
+  const { data: { session } } = await supabase.auth.getSession()
+
+  if (!session) redirect("/login")
   const { activePageId, pages } = useBuilderStore()
   const [logs, setLogs] = useState<string[]>([])
   const [status, setStatus] = useState<string>("idle")
@@ -49,6 +53,7 @@ export default function DashboardPage() {
           <DeployPanel />
           <BuilderInspector />
           <AIDeployPanel />
+          <>{children}</>
         </div>
       </aside>
     </div>

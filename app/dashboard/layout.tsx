@@ -7,7 +7,7 @@
 
 
 import { redirect } from "next/navigation"
-import { createSupabaseServer } from "@/lib/supabase/serverClient"
+import { createSupabaseServer } from "@lib/server/serverClient"
 
 export default async function DashboardLayout({ children }: any) {
   const supabase = createSupabaseServer()
