@@ -2,13 +2,18 @@
 "use client"
 
 import React, { useState } from "react"
-import { BuilderSchema } from "@lib/exporter/schema"
 import { NodeRenderer } from "@canvas/NodeRenderer"
-import { useBuilderStore } from "@store/builderStore"
-import { DndContext, PointerSensor, useSensor, useSensors, DragOverlay } from "@dnd-kit/core"
+import { useBuilderStore } from "@state/builderStore"
+import {
+  DndContext,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragOverlay
+} from "@dnd-kit/core"
 
 type BuilderCanvasProps = {
-  builderSchema: BuilderSchema
+  builderSchema: any
 }
 
 export const BuilderCanvas: React.FC<BuilderCanvasProps> = ({ builderSchema }) => {
@@ -35,8 +40,9 @@ export const BuilderCanvas: React.FC<BuilderCanvasProps> = ({ builderSchema }) =
       <div
         className="builder-canvas p-4 h-full overflow-auto bg-gray-50"
         style={{
-          maxWidth: activeBreakpoint === "tablet" ? 768 : activeBreakpoint === "mobile" ? 375 : 1440,
-          margin: "0 auto",
+          maxWidth:
+            activeBreakpoint === "tablet" ? 768 : activeBreakpoint === "mobile" ? 375 : 1440,
+          margin: "0 auto"
         }}
       >
         {activePage?.components?.map((component) => (
