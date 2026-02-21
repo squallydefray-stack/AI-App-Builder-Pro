@@ -14,17 +14,20 @@
     "jsx": "preserve",
     "incremental": true,
     "forceConsistentCasingInFileNames": true,
+    "plugins": [{ "name": "next" }],
     "baseUrl": ".",
     "paths": {
       "@/*": ["app/*"],
       "@lib/*": ["lib/*"],
       "@components/*": ["components/*"],
+
+      // Builder aliases
       "@builder/*": ["builder/*"],
       "@builderComponents/*": ["builder/components/*"],
       "@canvas/*": ["builder/canvas/*"],
       "@properties/*": ["builder/properties/*"],
       "@state/*": ["builder/state/*"],
-      "@store/*": ["builder/store/*"],
+      "@state/*": ["builder/store/*"], 
       "@ai/*": ["ai/*"],
       "@export/*": ["export/*"],
       "@server/*": ["server/*"],
@@ -39,7 +42,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    ".next/dev/types/**/*.ts",
   ],
   "exclude": ["node_modules"]
 }
