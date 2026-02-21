@@ -3,12 +3,13 @@
 
 import React, { useEffect, useState } from "react"
 import { BuilderCanvas } from "@canvas/Canvas"
-import PageTree from "@builderComponents/TreeView"
-import { BuilderInspector } from "@builderComponents/InspectorPanel"
-import DeployPanel from "@builderComponents/DeployPanel"
+import PageTree from "@@components/TreeView"
+import { BuilderInspector } from "@@components/InspectorPanel"
+import DeployPanel from "@components/DeployPanel"
 import AIDeployPanel from "@components/AIDeployPanel"
 import { runDeployment } from "@lib/deploy"
 import { useBuilderStore } from "@state/builderStore"
+import { BuilderInspector } from "@components/InspectorPanel"
 
 export default function DashboardPage() {
   const { activePageId, pages } = useBuilderStore()

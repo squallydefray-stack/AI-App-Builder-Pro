@@ -2,9 +2,9 @@
 "use client"
 
 import React from "react"
-import { useBuilderStore } from "@/state/builderStore"
+import { useBuilderStore } from "@state/builderStore"
 
-export const InspectorPanel: React.FC = () => {
+export const BuilderInspector: React.FC = () => {
   const { selectedIds, pages, updateComponentProps } = useBuilderStore()
   const selectedId = selectedIds[0]
   if (!selectedId) return <div className="p-4 text-gray-400">Select a component</div>
@@ -19,8 +19,9 @@ export const InspectorPanel: React.FC = () => {
     }
   }
 
-  const activePage = pages[0]
+  const activePage = pages[0] // Simplified: first page
   const component = findComponent(activePage.components)
+
   if (!component) return null
 
   return (
@@ -34,6 +35,18 @@ export const InspectorPanel: React.FC = () => {
           value={component.props.text || ""}
           onChange={(e) =>
             updateComponentProps(component.id, { ...component.props, text: e.target.value })
+          }
+          className="w-full border px-2 py-1 rounded"
+        />
+      </div>
+
+      <div className="mb-2">
+        <label className="block text-sm font-medium">ClassName</label>
+        <input
+          type="text"
+          value={component.props.className || ""}
+          onChange={(e) =>
+            updateComponentProps(component.id, { ...component.props, className: e.target.value })
           }
           className="w-full border px-2 py-1 rounded"
         />
