@@ -1,5 +1,5 @@
 // builder/utils/treeGuards.ts
-import { ComponentNode } from "@/builder/schema"
+import { ComponentNode } from "@lib/builder/schema"
 
 export function isDescendant(
   tree: ComponentNode[],
