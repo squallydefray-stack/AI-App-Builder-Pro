@@ -11,6 +11,7 @@ import {
   useSensors,
   DragOverlay
 } from "@dnd-kit/core"
+import { getSnapOffset } from "@canvas/GridSnapping"
 
 type BuilderCanvasProps = {
   builderSchema: any

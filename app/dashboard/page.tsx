@@ -1,15 +1,16 @@
 // app/dashboard/page.tsx
 "use client"
 
+"use client"
+
 import React, { useEffect, useState } from "react"
-import { BuilderCanvas } from "@canvas/Canvas"
-import PageTree from "@@components/TreeView"
-import { BuilderInspector } from "@@components/InspectorPanel"
-import DeployPanel from "@components/DeployPanel"
-import AIDeployPanel from "@components/AIDeployPanel"
-import { runDeployment } from "@lib/deploy"
-import { useBuilderStore } from "@state/builderStore"
 import { BuilderInspector } from "@components/InspectorPanel"
+import DeployPanel from "@builderComponents/DeployPanel"
+import AIDeployPanel from "@components/AIDeployPanel"
+import { useBuilderStore } from "@state/builderStore"
+import { runDeployment } from "@lib/deploy"
+import Canvas from "@canvas/Canvas"
+import PageTree from "@builderComponents/PageTree"
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = createSupabaseServer()
@@ -53,7 +54,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <DeployPanel />
           <BuilderInspector />
           <AIDeployPanel />
-          <>{children}</>
+           children
         </div>
       </aside>
     </div>
