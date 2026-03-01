@@ -2,7 +2,7 @@
 "use client"
 
 import React from "react"
-import { useBuilderStore } from "@/state/builderStore"
+import { useBuilderStore } from "@/builder/state/builderStore"
 import { BuilderComponent } from "@lib/exporter/schema"
 import { v4 as uuidv4 } from "uuid"
 
@@ -13,8 +13,7 @@ const AVAILABLE_COMPONENTS = [
   { type: "Container", label: "Container" },
 ]
 
-export default function ComponentPanel() {
-  const addComponent = useBuilderStore((s) => s.addComponent)
+export const ComponentPanel: React.FC = () => {  const addComponent = useBuilderStore((s) => s.addComponent)
 
   const handleAdd = (type: string) => {
     const newComp: BuilderComponent = {

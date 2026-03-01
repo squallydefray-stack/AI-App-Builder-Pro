@@ -1,114 +1,137 @@
 // app/page.tsx
 
-"use client";
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion"; 
-import Confetti from "react-confetti";
+"use client"
+
+import React, { useState, useEffect, useRef, useMemo } from "react"
+import { useRouter } from "next/navigation"
+import { motion, AnimatePresence } from "framer-motion"
+import Confetti from "react-confetti"
+
+/* ============================================================
+   TYPES
+============================================================ */
 
 interface Deployment {
-  id: string;
-  url: string;
-  status: "building" | "ready" | "error";
+  id: string
+  url: string
+  status: "building" | "ready" | "error"
 }
 
-export default function HomePage() {
-  const router = useRouter();
-  const [deployHistory, setDeployHistory] = useState<Deployment[]>([]);
-  const [statusFilter, setStatusFilter] = useState<"all" | "building" | "ready" | "error">("all");
-  const [celebratingId, setCelebratingId] = useState<string | null>(null);
-  const [progressMap, setProgressMap] = useState<Record<string, number>>({});
+/* ============================================================
+   DASHBOARD PAGE
+============================================================ */
 
-  /** Fetch deployments from API */
+export default function HomePage() {
+  const router = useRouter()
+
+  /* ---------------- STATE ---------------- */
+  const [deployHistory, setDeployHistory] = useState<Deployment[]>([])
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "building" | "ready" | "error"
+  >("all")
+  const [celebratingId, setCelebratingId] = useState<string | null>(null)
+  const [progressMap, setProgressMap] = useState<Record<string, number>>({})
+
+  /* ---------------- FETCH DEPLOYMENTS ---------------- */
   const fetchDeployments = async (): Promise<Deployment[]> => {
     try {
-      const res = await fetch("/api/deploy/vercel", { method: "GET" });
-      if (!res.ok) throw new Error("Failed to fetch deployments");
-      const data = await res.json();
-      return data.deployments ?? [];
+      const res = await fetch("/api/deploy/vercel")
+      if (!res.ok) throw new Error("Failed to fetch deployments")
+      const data: { deployments: Deployment[] } = await res.json()
+      return data.deployments ?? []
     } catch (err) {
-      console.error("Error fetching deployments:", err);
-      return [];
+      console.error("Error fetching deployments:", err)
+      return []
     }
-  };
+  }
 
-  /** Refresh deployments every 8 seconds */
+  /* ---------------- REFRESH HISTORY & CELEBRATION ---------------- */
   const refreshDeployments = async () => {
-    const data = await fetchDeployments();
+    const data = await fetchDeployments()
     setDeployHistory((prev) => {
-      const latest = data[0];
-      const prevLatest = prev[0];
+      const latest = data[0]
+      const prevLatest = prev[0]
       if (latest?.status === "ready" && latest.id !== prevLatest?.id) {
-        setCelebratingId(latest.id);
-        setTimeout(() => setCelebratingId(null), 4000);
+        setCelebratingId(latest.id)
+        setTimeout(() => setCelebratingId(null), 4000)
       }
-      return data;
-    });
+      return data
+    })
 
-    // Initialize progress for new building deployments
-    const newProgress: Record<string, number> = {};
+    // Initialize progress for building deployments
+    const newProgress: Record<string, number> = {}
     data.forEach((d) => {
-      if (d.status === "building") newProgress[d.id] = progressMap[d.id] ?? 0;
-    });
-    setProgressMap(newProgress);
-  };
+      if (d.status === "building") newProgress[d.id] = progressMap[d.id] ?? 0
+    })
+    setProgressMap(newProgress)
+  }
 
+  /* ---------------- AUTO REFRESH ---------------- */
   useEffect(() => {
-    refreshDeployments();
-    const interval = setInterval(refreshDeployments, 8000);
-    return () => clearInterval(interval);
-  }, []);
+    refreshDeployments()
+    const interval = setInterval(refreshDeployments, 8000)
+    return () => clearInterval(interval)
+  }, [])
 
-  /** Animate progress bars for building deployments */
+  /* ---------------- PROGRESS ANIMATION ---------------- */
   useEffect(() => {
-    const timers: NodeJS.Timeout[] = [];
+    const timers: NodeJS.Timeout[] = []
+
     deployHistory.forEach((d) => {
       if (d.status === "building") {
         const timer = setInterval(() => {
           setProgressMap((prev) => {
-            const current = prev[d.id] ?? 0;
-            if (current >= 100) {
-              clearInterval(timer);
-              return { ...prev, [d.id]: 100 };
+            const current = prev[d.id] ?? 0
+            if (current >= 100 || d.status !== "building") {
+              clearInterval(timer)
+              return { ...prev, [d.id]: 100 }
             }
-            return { ...prev, [d.id]: current + 1 };
-          });
-        }, 100);
-        timers.push(timer);
+            return { ...prev, [d.id]: current + 1 }
+          })
+        }, 100)
+        timers.push(timer)
       }
-    });
-    return () => timers.forEach(clearInterval);
-  }, [deployHistory]);
+    })
 
-  const filteredDeployments =
-    statusFilter === "all"
+    return () => timers.forEach(clearInterval)
+  }, [deployHistory])
+
+  /* ---------------- FILTERED DEPLOYMENTS ---------------- */
+  const filteredDeployments = useMemo(() => {
+    return statusFilter === "all"
       ? deployHistory
-      : deployHistory.filter((d) => d.status === statusFilter);
+      : deployHistory.filter((d) => d.status === statusFilter)
+  }, [deployHistory, statusFilter])
 
-  /** LiveLogs component with Download button */
+  /* ============================================================
+     LIVE LOGS COMPONENT
+  ============================================================ */
   const LiveLogs = ({ deploymentId }: { deploymentId: string }) => {
-    const [logs, setLogs] = useState<string[]>([]);
-    const containerRef = useRef<HTMLDivElement>(null);
+    const [logs, setLogs] = useState<string[]>([])
+    const containerRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
-      const evtSource = new EventSource(`/api/deploy/vercel/stream?id=${deploymentId}`);
+      const evtSource = new EventSource(
+        `/api/deploy/vercel/stream?id=${deploymentId}`
+      )
       evtSource.onmessage = (e) => {
-        setLogs((prev) => [...prev, e.data]);
-        if (containerRef.current) containerRef.current.scrollTop = containerRef.current.scrollHeight;
-      };
-      evtSource.onerror = () => evtSource.close();
-      return () => evtSource.close();
-    }, [deploymentId]);
+        setLogs((prev) => [...prev, e.data])
+        if (containerRef.current)
+          containerRef.current.scrollTop = containerRef.current.scrollHeight
+      }
+      evtSource.onerror = () => evtSource.close()
+      return () => evtSource.close()
+    }, [deploymentId])
 
     const downloadLogs = () => {
-      const text = logs.join("\n");
-      const blob = new Blob([text], { type: "text/plain" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = `deployment-${deploymentId}-logs.txt`;
-      link.click();
-      URL.revokeObjectURL(link.href);
-    };
+      const text = logs.join("\n")
+      const blob = new Blob([text], { type: "text/plain" })
+      const link = document.createElement("a")
+      link.href = URL.createObjectURL(blob)
+      link.download = `deployment-${deploymentId}-logs.txt`
+      link.click()
+      URL.revokeObjectURL(link.href)
+    }
 
     return (
       <div className="mt-2 bg-gray-900 p-2 rounded text-xs font-mono relative">
@@ -127,11 +150,15 @@ export default function HomePage() {
           ))}
         </div>
       </div>
-    );
-  };
+    )
+  }
 
+  /* ============================================================
+     RENDER
+  ============================================================ */
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center p-6">
+      {/* CONFETTI */}
       {celebratingId && (
         <Confetti
           numberOfPieces={150}
@@ -155,12 +182,19 @@ export default function HomePage() {
 
       {deployHistory.length > 0 && (
         <div className="bg-gray-800 p-6 rounded-xl w-full max-w-3xl mt-6">
+          {/* HEADER & FILTER */}
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-xl font-semibold">Deployment History (Live)</h2>
             <div className="flex gap-2">
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as any)}
+                onChange={(e) =>
+                  setStatusFilter(e.target.value as
+                    | "all"
+                    | "building"
+                    | "ready"
+                    | "error")
+                }
                 className="bg-gray-700 text-white rounded px-2 py-1"
               >
                 <option value="all">All</option>
@@ -168,6 +202,7 @@ export default function HomePage() {
                 <option value="ready">Ready</option>
                 <option value="error">Error</option>
               </select>
+
               <button
                 onClick={refreshDeployments}
                 className="px-3 py-1 bg-blue-600 hover:bg-blue-500 rounded text-sm"
@@ -177,18 +212,19 @@ export default function HomePage() {
             </div>
           </div>
 
+          {/* DEPLOYMENTS LIST */}
           <div className="flex flex-col gap-4">
             <AnimatePresence>
               {filteredDeployments.map((d, idx) => {
-                const isLatest = idx === 0;
-                let badgeColor = "text-yellow-400";
-                let badgeEmoji = "🟡";
+                const isLatest = idx === 0
+                let badgeColor = "text-yellow-400"
+                let badgeEmoji = "🟡"
                 if (d.status === "ready") {
-                  badgeColor = "text-green-400";
-                  badgeEmoji = "🟢";
+                  badgeColor = "text-green-400"
+                  badgeEmoji = "🟢"
                 } else if (d.status === "error") {
-                  badgeColor = "text-red-500";
-                  badgeEmoji = "🔴";
+                  badgeColor = "text-red-500"
+                  badgeEmoji = "🔴"
                 }
 
                 return (
@@ -218,7 +254,9 @@ export default function HomePage() {
                       <span className="break-all">{d.url}</span>
                       <span className={`ml-4 text-sm font-semibold ${badgeColor}`}>
                         {badgeEmoji} {d.status}
-                        {isLatest && <span className="ml-1 font-bold">Latest</span>}
+                        {isLatest && (
+                          <span className="ml-1 font-bold">Latest</span>
+                        )}
                       </span>
                     </div>
 
@@ -233,14 +271,16 @@ export default function HomePage() {
                       </div>
                     )}
 
-                    {d.status === "building" && <LiveLogs deploymentId={d.id} />}
+                    {d.status === "building" && (
+                      <LiveLogs deploymentId={d.id} />
+                    )}
                   </motion.div>
-                );
+                )
               })}
             </AnimatePresence>
           </div>
         </div>
       )}
     </div>
-  );
+  )
 }

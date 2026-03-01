@@ -1,139 +1,206 @@
-/* ============================================================
-   BREAKPOINT SYSTEM
-============================================================ */
+/* =============================
+   BREAKPOINTS
+============================= */
+export type Breakpoint = "base" | "mobile" | "tablet" | "desktop";
 
-export type Breakpoint = "base" | "tablet" | "mobile"
-
-export type ResponsiveProps = {
-  base: Record<string, any>
-  tablet?: Record<string, any>
-  mobile?: Record<string, any>
+/* =============================
+   STYLING PROPS
+============================= */
+export interface StyleProps {
+  x?: number;
+  y?: number;
+  width?: number | "hug" | "fill";
+  height?: number | "hug" | "fill";
+  backgroundColor?: string;
+  color?: string;
+  fontSize?: number;
+  borderRadius?: number;
 }
 
-/* ============================================================
-   SIZE & CONSTRAINTS
-============================================================ */
+export type PropsPerBreakpoint = {
+  [key in Breakpoint]?: StyleProps;
+};
 
-export type SizeMode = "fixed" | "hug" | "fill"
-
-export type Constraint =
-  | "left"
-  | "right"
-  | "top"
-  | "bottom"
-  | "center-x"
-  | "center-y"
-  | "stretch-x"
-  | "stretch-y"
-
-export interface Constraints {
-  top?: boolean
-  bottom?: boolean
-  left?: boolean
-  right?: boolean
-  centerX?: boolean
-  centerY?: boolean
+/* =============================
+   POSITION
+============================= */
+export interface Position {
+  x: number;
+  y: number;
 }
 
-/* ============================================================
-   AUTO-LAYOUT
-============================================================ */
+export type FlexDirection = "row" | "column";
 
+/* =============================
+   AUTO LAYOUT
+============================= */
 export interface AutoLayoutConfig {
-  enabled: boolean
-  direction?: "row" | "column"
-  gap?: number
-  padding?: number
-  justify?: "start" | "center" | "end" | "between"
-  align?: "start" | "center" | "end" | "stretch"
+  enabled: boolean;
+  direction: FlexDirection;
+  gap?: number;
+  fillChildren?: boolean;
+  hugChildren?: boolean;
 }
-
-/* ============================================================
-   LAYOUT SYSTEM
-============================================================ */
 
 export interface LayoutConfig {
-  display?: "flex" | "grid" | "absolute"
-  direction?: "row" | "column"
-  gap?: number
-  justify?: string
-  align?: string
-  constraints?: Constraint[]
-  autoLayout?: AutoLayoutConfig
-  widthMode?: SizeMode
-  heightMode?: SizeMode
+  mode: "absolute" | "auto";
+  autoLayout?: AutoLayoutConfig;
 }
 
-/* ============================================================
-   COMPONENT
-============================================================ */
+/* =============================
+   COMPONENT TYPES
+============================= */
+export type ComponentType =
+  | "Box"
+  | "Button"
+  | "Input"
+  | "Card"
+  | "Text"
+  | "Image"
+  | "Repeater";
 
+export type ComponentProps = Record<string, any>;
+export type ComponentStyle = Record<string, any>;
+
+/* =============================
+   BUILDER COMPONENTS & PAGES
+============================= */
 export interface BuilderComponent {
-  id: string
-  type: string
-  parentId: string | null
-  props: ResponsiveProps
-  layout?: LayoutConfig
-  constraints?: Constraints
-  children?: BuilderComponent[]
+  id: string;
+  type: ComponentType;
+  props: ComponentProps;
+  style?: ComponentStyle;
+  position?: Position;
+  propsPerBreakpoint?: PropsPerBreakpoint;
+  layout?: LayoutConfig;
+  children?: BuilderComponent[];
+  parentId?: string | null;
 }
-
-/* ============================================================
-   PAGE
-============================================================ */
 
 export interface BuilderPage {
-  id: string
-  name: string
-  route: string
-  components: BuilderComponent[]
+  id: string;
+  name: string;
+  components: BuilderComponent[];
+  pages?: BuilderPage[];
 }
-
-/* ============================================================
-   ROOT SCHEMA
-============================================================ */
 
 export interface BuilderSchema {
-  version: "1.0.0"
-  pages: BuilderPage[]
+  id: string;
+  name: string;
+  pages: BuilderPage[];
+  components: BuilderComponent[];
 }
 
-export type PropDefinition = {
-  type:
-    | "text"
-    | "number"
-    | "boolean"
-    | "select"
-    | "spacing"
-    | "token-color"
-    | "token-font"
-  default?: any
-  options?: string[]
-  section?: string
+/* =============================
+   GENERIC NODE (for exports)
+============================= */
+export interface BuilderNode {
+  id: string;
+  type: string;
+  props?: Record<string, unknown>;
+  style?: Record<string, unknown>;
+  responsive?: PropsPerBreakpoint;
+  autoLayout?: AutoLayoutConfig;
+  position?: Position;
+  children?: BuilderNode[];
 }
 
-export type ComponentDefinition = {
-  type: string
-  props: Record<string, PropDefinition>
+/* =============================
+   CODE GENERATION HELPERS
+============================= */
+export function exportProject(schema: BuilderSchema) {
+  return {
+    web: generateNextJS(schema),
+    mobile: generateReactNative(schema),
+  };
 }
 
-export type ComponentVariant = {
-  name: string
-  props: Record<string, any>
+export function exportToReact(components: BuilderNode[]): string {
+  const body = components.map((node) => renderNode(node, 2)).join("\n");
+  return `
+import React from "react";
+
+export default function GeneratedPage() {
+  return (
+    <>
+${body}
+    </>
+  );
+}
+`.trim();
 }
 
-export type BuilderComponent = {
-  id: string
-  type: string
-  props: Record<string, any>
-  variants?: ComponentVariant[]
-  activeVariant?: string
+/* =============================
+   NODE RENDERER
+============================= */
+function renderNode(node: BuilderNode, indentLevel: number): string {
+  const indent = " ".repeat(indentLevel * 2);
+  const tag = resolveTag(node.type);
+  const props = buildProps(node.props);
+
+  if (!node.children || node.children.length === 0) {
+    if (node.type.toLowerCase() === "text") {
+      return `${indent}${escapeText(node.props?.text as string || "")}`;
+    }
+    return `${indent}<${tag}${props} />`;
+  }
+
+  const children = node.children
+    .map((child) => renderNode(child, indentLevel + 1))
+    .join("\n");
+
+  return `
+${indent}<${tag}${props}>
+${children}
+${indent}</${tag}>`.trim();
 }
 
-layout?: {
-  type: "flex" | "grid"
-  direction?: "row" | "column"
-  justify?: string
-  align?: string
-  gap?: number
+/* =============================
+   TAG RESOLUTION
+============================= */
+function resolveTag(type: string): string {
+  switch (type.toLowerCase()) {
+    case "button":
+      return "button";
+    case "text":
+      return "span";
+    case "card":
+    case "box":
+      return "div";
+    case "input":
+      return "input";
+    case "image":
+      return "img";
+    default:
+      return "div";
+  }
+}
+
+/* =============================
+   PROP BUILDER
+============================= */
+function buildProps(props?: Record<string, unknown>): string {
+  if (!props) return "";
+
+  return Object.entries(props)
+    .filter(([key]) => key !== "text")
+    .map(([key, value]) => {
+      if (key === "className" && typeof value === "string")
+        return ` className="${escapeAttribute(value)}"`;
+      if (typeof value === "string") return ` ${key}="${escapeAttribute(value)}"`;
+      if (typeof value === "boolean") return value ? ` ${key}` : "";
+      return ` ${key}={${JSON.stringify(value)}}`;
+    })
+    .join("");
+}
+
+/* =============================
+   ESCAPING
+============================= */
+function escapeText(text: string): string {
+  return text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function escapeAttribute(value: string): string {
+  return value.replace(/"/g, "&quot;");
 }

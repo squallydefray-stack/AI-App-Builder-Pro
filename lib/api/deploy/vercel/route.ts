@@ -1,78 +1,69 @@
 //
-//  route.ts
+//  deploy/vercel/route.ts
 //  AI-App-Builder-Pro
 //
-//  Created by Squally Da Boss on 2/19/26.
-//
 
-import { NextResponse } from "next/server"
-import { getBuilderSnapshot } from "@state/builderStore"
-import { generateNextProject } from "@export/next/generateNext"
-import { createRepoAndPush } from "@lib/github"
-import { deployToVercel } from "@lib/vercel"
-import { createClient } from "@supabase/supabase-js"
+// lib/api/deploy/vercel/route.ts
+import { NextResponse } from "next/server";
+import { getBuilderSnapshot } from "@state/builderStore";
+import { generateNextProject } from "@export/next/generateNext";
+import { createRepoAndPush } from "@lib/github";
+import { deployToVercel } from "@lib/vercel";
+import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+);
 
 export async function POST() {
   try {
-    const pages = getBuilderSnapshot()
-    if (!pages || pages.length === 0)
-      return NextResponse.json({ error: "No pages to deploy" }, { status: 400 })
-
-    // 1️⃣ Generate Next.js project files
-    const projectFiles = await generateNextProject(pages)
-
-    // 2️⃣ Create GitHub repo and push code
-    const repoName = `ai-builder-${Date.now()}`
-    const repoUrl = await createRepoAndPush(repoName, projectFiles)
-
-    // 3️⃣ Deploy to Vercel
-    const projectName = `${process.env.VERCEL_PROJECT_NAME_PREFIX}-${Date.now()}`
-    const liveUrl = await deployToVercel({ repoUrl, projectName })
-
-    // 4️⃣ Store deployment in Supabase
-    const { data, error } = await supabase.from("deployments").insert({
-      project_id: null, // add if you have project IDs
-      deployment_id: projectName, // or Vercel deployment ID
-      live_url: liveUrl,
-    }).select().single()
-
-    if (error) {
-      console.warn("Failed to save deployment:", error.message)
+    const pages = getBuilderSnapshot();
+    if (!pages || pages.length === 0) {
+      return NextResponse.json({ error: "No pages to deploy" }, { status: 400 });
     }
 
-let accumulatedLogs = ""
+    // 1️⃣ Generate Next.js project files
+    const projectFiles = await generateNextProject(pages);
 
-function appendLog(message: string) {
-  accumulatedLogs += message + "\n"
-}
+    // 2️⃣ Create GitHub repo and push code
+    const repoName = `ai-builder-${Date.now()}`;
+    const repoUrl = await createRepoAndPush(repoName, projectFiles);
 
-appendLog("Starting deployment...")
-appendLog(`Repo created: ${repoUrl}`)
-appendLog("Deploying to Vercel...")
+    // 3️⃣ Insert deployment row in Supabase (for logs & terminal)
+    const projectName = `${process.env.VERCEL_PROJECT_NAME_PREFIX}-${Date.now()}`;
+    const { data, error: insertError } = await supabase
+      .from("deployments")
+      .insert({
+        deployment_id: projectName,
+        live_url: null,
+        logs: "",
+      })
+      .select()
+      .single();
 
-const liveUrl = await deployToVercel({ repoUrl, projectName })
+    if (insertError) console.warn("Failed to insert deployment row:", insertError.message);
+    const deploymentId = data?.deployment_id || projectName;
 
-appendLog(`Live at: ${liveUrl}`)
-appendLog("Deployment complete")
+    // 4️⃣ Deploy to Vercel (logs will stream to Supabase)
+    const { liveUrl } = await deployToVercel({ repoUrl, projectName, deploymentId });
 
-await supabase.from("deployments").insert({
-  deployment_id: projectName,
-  live_url: liveUrl,
-  logs: accumulatedLogs
-})
+    // 5️⃣ Update final live URL in Supabase
+    await supabase
+      .from("deployments")
+      .update({ live_url: liveUrl })
+      .eq("deployment_id", deploymentId);
 
     return NextResponse.json({
-      message: "Deployment successful!",
-      deploymentId: data?.deployment_id || projectName,
+      message: "Deployment started successfully!",
+      deploymentId,
       liveUrl,
-    })
+    });
   } catch (err: any) {
-    console.error("Vercel deployment failed:", err)
-    return NextResponse.json({ error: err.message || "Deployment failed" }, { status: 500 })
+    console.error("Vercel deployment failed:", err);
+    return NextResponse.json(
+      { error: err.message || "Deployment failed" },
+      { status: 500 }
+    );
   }
 }

@@ -1,11 +1,3 @@
-//
-//  layoutOptimizer.ts
-//  AI-App-Builder-Pro
-//
-//  Created by Squally Da Boss on 2/17/26.
-//
-
-
 // lib/ai/layoutOptimizer.ts
 
 import { BuilderComponent } from "@lib/exporter/schema"
@@ -27,6 +19,7 @@ export function optimizeLayoutTree(
           enabled: true,
           direction: "column",
           gap: 16,
+          padding: 16,
           justify: "start",
           align: "stretch",
         },

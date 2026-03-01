@@ -1,7 +1,7 @@
 // export/zip/zipProject.ts
 import { BuilderSchema } from "@lib/exporter/schema"
-import { generateNextProject } from "../next/generateNext"
-import { writeFilesToTempDir, zipDirectory } from "../fileWriter"
+import { generateNextProject } from "@lib/next/generateNext"
+import { writeFilesToTempDir, zipDirectory } from "@lib/exporter/fileWriter"
 
 export async function zipProject(schema: BuilderSchema) {
   const fileMap = generateNextProject(schema)

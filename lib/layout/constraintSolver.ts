@@ -1,55 +1,93 @@
 // lib/layout/constraintSolver.ts
 
-import { BuilderComponent } from "@lib/exporter/schema"
+import { BuilderComponent, Breakpoint } from "@lib/exporter/schema"
 
-export function applyConstraints(
+export type LayoutResult = {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+export type ParentBounds = {
+  width: number
+  height: number
+}
+
+const DEFAULT_WIDTH = 100
+const DEFAULT_HEIGHT = 50
+
+export function solveConstraints(
   component: BuilderComponent,
-  parentWidth: number,
-  parentHeight: number
-): BuilderComponent {
+  parent: ParentBounds,
+  breakpoint: Breakpoint
+): LayoutResult {
+  const baseProps = component.props?.base ?? {}
+  const bpProps = component.props?.[breakpoint] ?? {}
 
-  if (!component.constraints) return component
-
-  const base = component.props.base || {}
-  let width = base.width || 100
-  let height = base.height || 50
-  let x = base.x || 0
-  let y = base.y || 0
-
-  const c = component.constraints
-
-  // Horizontal stretch
-  if (c.left && c.right) {
-    width = parentWidth
-    x = 0
+  // Breakpoint override resolution
+  const resolved = {
+    ...baseProps,
+    ...bpProps,
   }
 
-  // Vertical stretch
-  if (c.top && c.bottom) {
-    height = parentHeight
-    y = 0
+  let width = resolved.width ?? DEFAULT_WIDTH
+  let height = resolved.height ?? DEFAULT_HEIGHT
+  let x = resolved.x ?? 0
+  let y = resolved.y ?? 0
+
+  const c = component.constraints ?? {}
+
+  // ================================
+  // HORIZONTAL CONSTRAINTS
+  // ================================
+
+  const hasLeft = c.left !== undefined
+  const hasRight = c.right !== undefined
+
+  if (hasLeft && hasRight) {
+    const left = Number(c.left) || 0
+    const right = Number(c.right) || 0
+
+    x = left
+    width = parent.width - left - right
+  } else if (hasLeft) {
+    x = Number(c.left) || 0
+  } else if (hasRight) {
+    const right = Number(c.right) || 0
+    x = parent.width - width - right
   }
 
-  // Centering
   if (c.centerX) {
-    x = parentWidth / 2 - width / 2
+    x = (parent.width - width) / 2
+  }
+
+  // ================================
+  // VERTICAL CONSTRAINTS
+  // ================================
+
+  const hasTop = c.top !== undefined
+  const hasBottom = c.bottom !== undefined
+
+  if (hasTop && hasBottom) {
+    const top = Number(c.top) || 0
+    const bottom = Number(c.bottom) || 0
+
+    y = top
+    height = parent.height - top - bottom
+  } else if (hasTop) {
+    y = Number(c.top) || 0
+  } else if (hasBottom) {
+    const bottom = Number(c.bottom) || 0
+    y = parent.height - height - bottom
   }
 
   if (c.centerY) {
-    y = parentHeight / 2 - height / 2
+    y = (parent.height - height) / 2
   }
 
-  return {
-    ...component,
-    props: {
-      ...component.props,
-      base: {
-        ...base,
-        width,
-        height,
-        x,
-        y,
-      },
-    },
-  }
+  width = Math.max(0, width)
+  height = Math.max(0, height)
+
+  return { x, y, width, height }
 }

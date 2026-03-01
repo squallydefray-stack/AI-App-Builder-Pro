@@ -2,14 +2,18 @@
 "use client"
 
 import React from "react"
-import { useBuilderStore } from "@state/builderStore"
+import { useBuilderStore } from "@/builder/state/builderStore"
 
 export const BuilderInspector: React.FC = () => {
   const { selectedIds, pages, updateComponentProps } = useBuilderStore()
   const selectedId = selectedIds[0]
-  if (!selectedId) return <div className="p-4 text-gray-400">Select a component</div>
 
-  const findComponent = (components: any[]): any => {
+  if (!selectedId) {
+    return <div className="p-4 text-gray-400">Select a component</div>
+  }
+
+  // Recursively find component by id
+  const findComponent = (components: any[]): any | undefined => {
     for (const comp of components) {
       if (comp.id === selectedId) return comp
       if (comp.children) {
@@ -17,10 +21,11 @@ export const BuilderInspector: React.FC = () => {
         if (found) return found
       }
     }
+    return undefined
   }
 
-  const activePage = pages[0] // Simplified: first page
-  const component = findComponent(activePage.components)
+  const activePage = pages[0]
+  const component = findComponent(activePage?.components ?? [])
 
   if (!component) return null
 
@@ -32,7 +37,7 @@ export const BuilderInspector: React.FC = () => {
         <label className="block text-sm font-medium">Text</label>
         <input
           type="text"
-          value={component.props.text || ""}
+          value={component.props?.text ?? ""}
           onChange={(e) =>
             updateComponentProps(component.id, { ...component.props, text: e.target.value })
           }
@@ -44,7 +49,7 @@ export const BuilderInspector: React.FC = () => {
         <label className="block text-sm font-medium">ClassName</label>
         <input
           type="text"
-          value={component.props.className || ""}
+          value={component.props?.className ?? ""}
           onChange={(e) =>
             updateComponentProps(component.id, { ...component.props, className: e.target.value })
           }

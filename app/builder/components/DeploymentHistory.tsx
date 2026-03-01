@@ -1,45 +1,54 @@
-// app/builder/components/DeploymentHistory.tsx
-
+// app/builder/canvas/AutoLayoutGapPreview.tsx
 "use client"
-import React, { useState } from "react"
-import LiveLogs from "./LiveLogs"
+import React from "react"
+import { BuilderComponent } from "@lib/exporter/schema"
+import { useBuilderStore } from "@/builder/state/builderStore"
 
-interface Deployment {
-  id: string
-  liveUrl: string
-  timestamp: string
+interface Props {
+  parent: BuilderComponent
 }
 
-interface DeploymentHistoryProps {
-  deployments: Deployment[]
-}
+export const AutoLayoutGapPreview: React.FC<Props> = ({ parent }) => {
+  if (!parent.children || !parent.layout?.autoLayout?.enabled) return null
 
-export default function DeploymentHistory({ deployments }: DeploymentHistoryProps) {
-  const [selectedDeployment, setSelectedDeployment] = useState<string | null>(null)
+  const { direction, gap = 0 } = parent.layout.autoLayout
+  const activeBreakpoint = useBuilderStore((s) => s.activeBreakpoint)
+
+  const getBox = (c: BuilderComponent) => {
+    const props = c.propsPerBreakpoint?.[activeBreakpoint] || c.props || {}
+    return {
+      x: props.x || 0,
+      y: props.y || 0,
+      width: props.width || 100,
+      height: props.height || 100,
+    }
+  }
 
   return (
-    <div className="mt-4 p-2 border-t border-neutral-800 space-y-2">
-      <h2 className="text-sm font-semibold text-white mb-1">Deployment History</h2>
+    <>
+      {parent.children.map((child, i) => {
+        if (i === 0) return null
+        const prev = parent.children[i - 1]
+        const prevBox = getBox(prev)
 
-      {deployments.length === 0 && <p className="text-xs text-neutral-400">No deployments yet</p>}
+        const x = direction === "row" ? prevBox.x + prevBox.width : getBox(parent).x
+        const y = direction === "column" ? prevBox.y + prevBox.height : getBox(parent).y
 
-      {deployments.map((d) => (
-        <div key={d.id} className="flex flex-col border border-gray-700 rounded p-2">
-          <div className="flex justify-between items-center mb-1">
-            <span className="text-xs text-gray-200">{new Date(d.timestamp).toLocaleString()}</span>
-            <a href={d.liveUrl} target="_blank" className="text-xs text-blue-400 hover:underline">
-              Live
-            </a>
-            <button
-              onClick={() => setSelectedDeployment(selectedDeployment === d.id ? null : d.id)}
-              className="text-xs text-gray-300 hover:text-white"
-            >
-              {selectedDeployment === d.id ? "Hide Logs" : "View Logs"}
-            </button>
-          </div>
-          {selectedDeployment === d.id && <LiveLogs deploymentId={d.id} />}
-        </div>
-      ))}
-    </div>
+        return (
+          <div
+            key={`gap-${child.id}`}
+            style={{
+              position: "absolute",
+              top: y,
+              left: x,
+              width: direction === "row" ? gap : prevBox.width,
+              height: direction === "column" ? gap : prevBox.height,
+              backgroundColor: "rgba(0, 122, 255, 0.5)",
+              zIndex: 998,
+            }}
+          />
+        )
+      })}
+    </>
   )
 }

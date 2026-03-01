@@ -1,67 +1,68 @@
-//
-//  autoLayoutEngine.ts
-//  AI-App-Builder-Pro
-//
-//  Created by Squally Da Boss on 2/17/26.
-//
+// lib/utils/autoLayoutEngine.ts
 
+import { BuilderComponent, Breakpoint } from "@lib/exporter/schema"
+import { applyAutoLayout } from "@lib/layout/autoLayout"
 
-// app/builder/utils/autoLayoutEngine.ts
-import { BuilderComponent } from "@lib/exporter/schema"
-import { applyConstraints } from "@lib/exporter/constraints"
+/**
+ * Expand any repeater components recursively
+ * For simplicity, assume 'repeater' type has a `repeatCount` prop
+ */
+export function expandRepeaters(components: BuilderComponent[]): BuilderComponent[] {
+  const result: BuilderComponent[] = []
 
-interface Layout {
-  x: number
-  y: number
-  width: number
-  height: number
+  components.forEach(comp => {
+    if (comp.type === "repeater" && comp.propsPerBreakpoint?.base?.repeatCount) {
+      const count = Number(comp.propsPerBreakpoint.base.repeatCount) || 1
+      for (let i = 0; i < count; i++) {
+        const instance = {
+          ...comp,
+          id: `${comp.id}_${i}`,
+          children: comp.children ? expandRepeaters(comp.children) : [],
+        }
+        result.push(instance)
+      }
+    } else {
+      const newComp = {
+        ...comp,
+        children: comp.children ? expandRepeaters(comp.children) : [],
+      }
+      result.push(newComp)
+    }
+  })
+
+  return result
 }
 
-export class AutoLayoutEngine {
-  static DEFAULT_SPACING = 10
+/**
+ * Reflow auto-layout recursively for all components and breakpoints
+ */
+export function reflowAutoLayout(
+  components: BuilderComponent[],
+  containerWidth: number,
+  containerHeight: number,
+  breakpoint: Breakpoint = "base"
+): BuilderComponent[] {
+  return components.map(comp => {
+    let updatedComp = comp
 
-  /**
-   * Compute layout recursively for a component
-   */
-  static computeLayout(node: BuilderComponent, parentX = 0, parentY = 0): Layout {
-    // Base props
-    const base = node.props.base || {}
-    let x = base.x ?? parentX
-    let y = base.y ?? parentY
-    let width = base.width ?? 100
-    let height = base.height ?? 50
-
-    // Apply constraints (min/max)
-    const constrained = applyConstraints(node, { x, y, width, height })
-    x = constrained.x
-    y = constrained.y
-    width = constrained.width
-    height = constrained.height
-
-    // Handle children auto-layout
-    if (node.children && node.children.length > 0) {
-      let offsetY = y + AutoLayoutEngine.DEFAULT_SPACING
-      node.children.forEach((child) => {
-        const childLayout = AutoLayoutEngine.computeLayout(child, x + AutoLayoutEngine.DEFAULT_SPACING, offsetY)
-        offsetY += childLayout.height + AutoLayoutEngine.DEFAULT_SPACING
-      })
-
-      // Optionally, update container height
-      height = Math.max(height, offsetY - y)
+    // Apply auto-layout if enabled
+    if (comp.layout?.mode === "auto") {
+      updatedComp = applyAutoLayout(comp, breakpoint, containerWidth, containerHeight)
     }
 
-    return { x, y, width, height }
-  }
+    // Recursively reflow children
+    if (updatedComp.children && updatedComp.children.length > 0) {
+      updatedComp = {
+        ...updatedComp,
+        children: reflowAutoLayout(
+          updatedComp.children,
+          updatedComp.propsPerBreakpoint[breakpoint]?.width ?? containerWidth,
+          updatedComp.propsPerBreakpoint[breakpoint]?.height ?? containerHeight,
+          breakpoint
+        ),
+      }
+    }
 
-  /**
-   * Compute layout for an array of components (e.g., top-level page components)
-   */
-  static computePageLayout(components: BuilderComponent[]): BuilderComponent[] {
-    let offsetY = 0
-    return components.map((c) => {
-      const layout = AutoLayoutEngine.computeLayout(c, 0, offsetY)
-      offsetY += layout.height + AutoLayoutEngine.DEFAULT_SPACING
-      return { ...c }
-    })
-  }
+    return updatedComp
+  })
 }

@@ -63,6 +63,8 @@ export const useBuilderStore = create<BuilderStore>()(
         id: "home",
         name: "Home",
         components: [],
+        orientation: "portrait", // default
+        setOrientation: (orientation) => set({ orientation }),
       },
     ],
     activePageId: "home",
@@ -70,7 +72,17 @@ export const useBuilderStore = create<BuilderStore>()(
     selectedIds: [],
     history: [],
     historyIndex: -1,
+    activeBreakpoint: "base",
+    dragHandlers: {},
+    dropTarget: null,
+        
+    /* Collaboration */
+    collabHighlights: [],
 
+    /* ---------------- Ultra Platinum AI + Layout ---------------- */
+    structuredPlan: null,
+    setStructuredPlan: (plan) => set({ structuredPlan: plan }),
+        
     // ------------------------
     // Pages
     // ------------------------

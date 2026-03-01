@@ -1,0 +1,74 @@
+// lib/snap/snapEngine.ts
+
+import { BuilderComponent, Breakpoint } from "../exporter/schema"
+
+export interface SnapGuide {
+  type: "vertical" | "horizontal"
+  position: number
+}
+
+const SNAP_DISTANCE = 8
+
+export function applySnapToComponents(
+  component: BuilderComponent,
+  others: BuilderComponent[],
+  breakpoint: Breakpoint
+): BuilderComponent {
+  const props = component.propsPerBreakpoint[breakpoint] || {}
+  let { x = 0, y = 0, width = 0, height = 0 } = props
+
+  others.forEach(other => {
+    if (other.id === component.id) return
+
+    const o = other.propsPerBreakpoint[breakpoint]
+    if (!o) return
+
+    if (Math.abs(x - (o.x || 0)) < SNAP_DISTANCE) {
+      x = o.x || 0
+    }
+
+    if (Math.abs(y - (o.y || 0)) < SNAP_DISTANCE) {
+      y = o.y || 0
+    }
+  })
+
+  return {
+    ...component,
+    propsPerBreakpoint: {
+      ...component.propsPerBreakpoint,
+      [breakpoint]: {
+        ...props,
+        x,
+        y,
+        width,
+        height,
+      },
+    },
+  }
+}
+
+export function generateSnapGuides(
+  component: BuilderComponent,
+  others: BuilderComponent[],
+  breakpoint: Breakpoint
+): SnapGuide[] {
+  const guides: SnapGuide[] = []
+  const props = component.propsPerBreakpoint[breakpoint]
+  if (!props) return guides
+
+  others.forEach(other => {
+    if (other.id === component.id) return
+    const o = other.propsPerBreakpoint[breakpoint]
+    if (!o) return
+
+    if (props.x === o.x) {
+      guides.push({ type: "vertical", position: o.x || 0 })
+    }
+
+    if (props.y === o.y) {
+      guides.push({ type: "horizontal", position: o.y || 0 })
+    }
+  })
+
+  return guides
+}

@@ -2,7 +2,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { useBuilderStore } from "@state/builderStore"
+import { useBuilderStore } from "@/builder/state/builderStore"
 
 export default function ExportPanel() {
   const pages = useBuilderStore((s) => s.pages)

@@ -1,0 +1,103 @@
+// app/ai/AICommandProcessor.ts
+"use client"
+
+import { BuilderComponent } from "@lib/exporter/schema"
+import OpenAI from "openai"
+import { useBuilderStore } from "@/builder/state/builderStore"
+
+export type AICommand = {
+  components: BuilderComponent[]
+}
+
+/**
+ * parseAICommandToComponents
+ * Converts a freeform text prompt into nested BuilderComponent array using GPT
+ */
+export async function parseAICommandToComponents(command: string): Promise<AICommand> {
+  if (!command.trim()) return { components: [] }
+
+  try {
+    const prompt = `
+You are an AI that outputs a nested JSON array of UI components for a builder.
+- Each component must have: id (unique string), type (string), props (object), children (array), parentId (string|null)
+- Only output valid JSON of the components array (no extra text)
+- Example: {"components":[{"id":"hero","type":"Hero","props":{},"children":[...],"parentId":null}]}
+- Prompt: "${command}"
+    `
+
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    })
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+    })
+
+    const text = response.choices[0].message?.content || ""
+    const jsonMatch = text.match(/\{.*\}/s)
+    if (!jsonMatch) throw new Error("No JSON returned from AI")
+
+    const data = JSON.parse(jsonMatch[0])
+    const components: BuilderComponent[] = Array.isArray(data.components)
+      ? ensureUniqueIds(data.components)
+      : []
+
+    return { components }
+  } catch (err) {
+    console.error("AI Command Error:", err)
+    // Fallback component (Ultra Platinum ready)
+    return {
+      components: [
+        {
+          id: `comp-${Date.now()}`,
+          type: "Text",
+          props: { base: {} },               // <- now valid
+          propsPerBreakpoint: { base: {} },  // optional default styling
+          layout: { mode: "auto" },
+          children: [],
+          parentId: null,
+        },
+      ],
+    }
+  }
+}
+
+/**
+ * Run an AI command and add components to the builder store
+ */
+export async function runAICommand(command: string) {
+  const { addComponent } = useBuilderStore.getState()
+  const result = await parseAICommandToComponents(command)
+
+  result.components.forEach((component) => {
+    // Add each component to the store (parentId null if root)
+    addComponent(component, component.parentId ?? null)
+  })
+}
+
+/**
+ * Recursively ensures every component has a unique id, props, propsPerBreakpoint, and parentId
+ */
+export function ensureUniqueIds(
+  components: BuilderComponent[],
+  prefix = "",
+  parentId: string | null = null
+): BuilderComponent[] {
+  return components.map((c, i) => {
+    const newId = `${prefix}${c.id}-${Date.now()}-${i}`
+
+    return {
+      ...c,
+      id: newId,
+      parentId,
+      props: { ...(c.props || {}), base: { ...(c.props?.base || {}) } },
+      propsPerBreakpoint: { ...(c.propsPerBreakpoint || { base: {} }) },
+      children: c.children
+        ? ensureUniqueIds(c.children, `${prefix}${c.id}-`, newId)
+        : [],
+      layout: c.layout || { mode: "auto" },
+    }
+  })
+}

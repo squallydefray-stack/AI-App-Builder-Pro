@@ -5,12 +5,11 @@
 //  Created by Squally Da Boss on 2/17/26.
 //
 
-
 "use client"
 
 import React, { useState } from "react"
-import PageTree from "./PageTree"
-import ComponentPanel from "@builderComponents/ComponentPanel"
+import PageTree from "@/builder/components/PageTree"
+import { ComponentPanel } from "@/builder/components/ComponentPanel"
 
 export default function LeftPanelTabs() {
   const [activeTab, setActiveTab] = useState<"pages" | "components">("pages")

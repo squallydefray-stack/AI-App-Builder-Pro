@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { exportToZip } from "./exportToZip"
 import { generateAppFiles } from "@/lib/exporter/generateAppFiles"
-import { useBuilderStore } from "@/state/builderStore"
+import { useBuilderStore } from "@/builde/state/builderStore"
 
 // Inside ExportModal component:
 <button

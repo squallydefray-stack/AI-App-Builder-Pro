@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { Button } from "@components/ui/Button"
+import { Button } from "@/builder/components/ui/Button"
 
 export default function AIDeployPanel() {
   const [status, setStatus] = useState<"idle" | "deploying" | "success" | "error">("idle")

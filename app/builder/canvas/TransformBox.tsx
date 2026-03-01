@@ -8,10 +8,10 @@
 
 "use client"
 import React, { useState } from "react"
-import { useBuilderStore } from "@/state/builderStore"
-import ResizeHandles from "./ResizeHandles"
-import { applyParentConstraints } from "../lib/constraintEngine"
-import { computeSnap } from "../lib/smartSnapEngine"
+import { useBuilderStore } from "@/builder/state/builderStore"
+import ResizeHandles from "@/builder/canvas/ResizeHandles"
+import { applyParentConstraints } from "@lib/constraintEngine"
+import { computeSnap } from "@lib/smartSnapEngine"
 
 interface TransformBoxProps {
   selectedIds: string[]

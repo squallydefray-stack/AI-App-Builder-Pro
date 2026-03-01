@@ -13,7 +13,7 @@ import { useBuilderStore } from ".@/state/builderStore"
 import { BuilderComponent, BuilderSchema } from "@lib/exporter/schema"
 import { convertToNextTailwind, convertToReactNative } from "@/lib/exporter/codeGenerator"
 import { reflowAutoLayout } from "@/lib/utils/autoLayoutEngine"
-import ExportFeedbackPanel from "./ExportFeedbackPanel"
+import ExportFeedbackPanel from "@/builder/canvas/ExportFeedbackPanel"
 
 interface LiveInteractiveRuntimeProps {
   zoom?: number

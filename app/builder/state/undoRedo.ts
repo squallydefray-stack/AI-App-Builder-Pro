@@ -8,7 +8,7 @@
 
 "use client"
 
-import { BuilderStore, Snapshot } from "./builderStore"
+import { BuilderStore, Snapshot } from "@/builder/state/builderStore"
 
 export function snapshot(store: BuilderStore & any) {
   const snap: Snapshot = {

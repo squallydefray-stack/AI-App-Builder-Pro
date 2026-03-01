@@ -1,138 +1,141 @@
-//
-//  MultiSelectResizer.tsx
-//  AI-App-Builder-Pro
-//
-//  Created by Squally Da Boss on 2/17/26.
-//
-
-
 "use client"
 
-import React, { useRef, useState, useEffect, useCallback } from "react"
-import { useBuilderStore } from "@/state/builderStore"
-import { BuilderComponent } from "@lib/exporter/schema"
-import { applyConstraints } from "@/lib/utils/constraintSolver"
-import { motion } from "framer-motion"
+import React, { useEffect, useState, useCallback } from "react"
+import { useBuilderStore } from "@/builder/state/builderStore"
 
-interface ResizerProps {
+interface MultiSelectResizerProps {
   selectedIds: string[]
-  parentRef: React.RefObject<HTMLDivElement>
+  parentRef: React.RefObject<HTMLDivElement | null>
 }
 
-const HANDLE_SIZE = 8
+interface Bounds {
+  left: number
+  top: number
+  width: number
+  height: number
+}
 
-export default function MultiSelectResizer({ selectedIds, parentRef }: ResizerProps) {
-  const { pages, activePageId, updateMultipleComponents } = useBuilderStore()
-  const page = pages.find(p => p.id === activePageId)
-  const [dragging, setDragging] = useState(false)
-  const [startPos, setStartPos] = useState<{ x: number; y: number } | null>(null)
-  const [initialSizes, setInitialSizes] = useState<Record<string, { width: number; height: number }>>({})
+export default function MultiSelectResizer({
+  selectedIds,
+  parentRef,
+}: MultiSelectResizerProps) {
+  const updateMultipleComponents = useBuilderStore(
+    (s) => s.updateMultipleComponents
+  )
+  const activeBreakpoint = useBuilderStore((s) => s.activeBreakpoint)
 
-  if (!page) return null
+  const [bounds, setBounds] = useState<Bounds | null>(null)
+  const [resizing, setResizing] = useState(false)
 
-  // Collect current sizes for selected components
+  // ----------------------------------------
+  // Calculate Bounding Box
+  // ----------------------------------------
   useEffect(() => {
-    if (!parentRef.current) return
-    const sizes: Record<string, { width: number; height: number }> = {}
-    selectedIds.forEach(id => {
-      const el = parentRef.current!.querySelector<HTMLElement>(`[data-builder-id="${id}"]`)
-      if (el) {
-        sizes[id] = { width: el.offsetWidth, height: el.offsetHeight }
-      }
+    if (!parentRef.current || selectedIds.length === 0) {
+      setBounds(null)
+      return
+    }
+
+    const elements = selectedIds
+      .map((id) =>
+        parentRef.current!.querySelector(
+          `[data-builder-id="${id}"]`
+        ) as HTMLElement | null
+      )
+      .filter(Boolean) as HTMLElement[]
+
+    if (elements.length === 0) {
+      setBounds(null)
+      return
+    }
+
+    const rects = elements.map((el) => el.getBoundingClientRect())
+    const parentRect = parentRef.current.getBoundingClientRect()
+
+    const left = Math.min(...rects.map((r) => r.left)) - parentRect.left
+    const top = Math.min(...rects.map((r) => r.top)) - parentRect.top
+    const right = Math.max(...rects.map((r) => r.right)) - parentRect.left
+    const bottom = Math.max(...rects.map((r) => r.bottom)) - parentRect.top
+
+    setBounds({
+      left,
+      top,
+      width: right - left,
+      height: bottom - top,
     })
-    setInitialSizes(sizes)
   }, [selectedIds, parentRef])
 
-  const handlePointerDown = (e: React.PointerEvent) => {
-    e.stopPropagation()
-    setDragging(true)
-    setStartPos({ x: e.clientX, y: e.clientY })
-  }
+  // ----------------------------------------
+  // Resize Handler
+  // ----------------------------------------
+  const startResize = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation()
+      setResizing(true)
 
-  const handlePointerMove = useCallback(
-    (e: PointerEvent) => {
-      if (!dragging || !startPos || !page) return
-      const deltaX = e.clientX - startPos.x
-      const deltaY = e.clientY - startPos.y
+      const startX = e.clientX
+      const startY = e.clientY
 
-      const updatedComponents = page.components.map(c => {
-        if (!selectedIds.includes(c.id)) return c
-        const init = initialSizes[c.id]
-        if (!init) return c
-        const newWidth = Math.max(10, init.width + deltaX)
-        const newHeight = Math.max(10, init.height + deltaY)
-        const constrained = applyConstraints(c, newWidth, newHeight)
-        return { ...c, props: { ...c.props, base: { ...c.props.base, width: constrained.width, height: constrained.height } } }
-      })
+      const startBounds = bounds
+      if (!startBounds) return
 
-      updateMultipleComponents(updatedComponents)
+      const handleMove = (moveEvent: MouseEvent) => {
+        const deltaX = moveEvent.clientX - startX
+        const deltaY = moveEvent.clientY - startY
+
+        const newWidth = Math.max(20, startBounds.width + deltaX)
+        const newHeight = Math.max(20, startBounds.height + deltaY)
+
+        updateMultipleComponents(
+          selectedIds.map((id) => ({
+            id,
+            props: {
+              width: newWidth,
+              height: newHeight,
+            },
+          }))
+        )
+      }
+
+      const handleUp = () => {
+        setResizing(false)
+        window.removeEventListener("mousemove", handleMove)
+        window.removeEventListener("mouseup", handleUp)
+      }
+
+      window.addEventListener("mousemove", handleMove)
+      window.addEventListener("mouseup", handleUp)
     },
-    [dragging, startPos, selectedIds, initialSizes, page, updateMultipleComponents]
+    [bounds, selectedIds, updateMultipleComponents]
   )
 
-  const handlePointerUp = () => {
-    setDragging(false)
-    setStartPos(null)
-  }
-
-  useEffect(() => {
-    if (dragging) {
-      window.addEventListener("pointermove", handlePointerMove)
-      window.addEventListener("pointerup", handlePointerUp)
-    } else {
-      window.removeEventListener("pointermove", handlePointerMove)
-      window.removeEventListener("pointerup", handlePointerUp)
-    }
-    return () => {
-      window.removeEventListener("pointermove", handlePointerMove)
-      window.removeEventListener("pointerup", handlePointerUp)
-    }
-  }, [dragging, handlePointerMove])
-
-  // Render live bounding box + handles
-  if (!parentRef.current) return null
-
-  const boundingBox = (() => {
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
-    selectedIds.forEach(id => {
-      const el = parentRef.current!.querySelector<HTMLElement>(`[data-builder-id="${id}"]`)
-      if (el) {
-        const rect = el.getBoundingClientRect()
-        const parentRect = parentRef.current!.getBoundingClientRect()
-        minX = Math.min(minX, rect.left - parentRect.left)
-        minY = Math.min(minY, rect.top - parentRect.top)
-        maxX = Math.max(maxX, rect.right - parentRect.left)
-        maxY = Math.max(maxY, rect.bottom - parentRect.top)
-      }
-    })
-    if (minX === Infinity) return null
-    return { left: minX, top: minY, width: maxX - minX, height: maxY - minY }
-  })()
-
-  if (!boundingBox) return null
+  if (!bounds) return null
 
   return (
-    <div className="absolute pointer-events-none" style={{ left: 0, top: 0, width: "100%", height: "100%" }}>
-      {/* Bounding box */}
-      <motion.div
-        className="absolute border-2 border-blue-500 rounded pointer-events-none"
+    <div
+      style={{
+        position: "absolute",
+        left: bounds.left,
+        top: bounds.top,
+        width: bounds.width,
+        height: bounds.height,
+        border: "2px solid #3b82f6",
+        pointerEvents: "none",
+        zIndex: 9999,
+      }}
+    >
+      {/* Resize Handle */}
+      <div
+        onMouseDown={startResize}
         style={{
-          left: boundingBox.left,
-          top: boundingBox.top,
-          width: boundingBox.width,
-          height: boundingBox.height,
-        }}
-      />
-
-      {/* Resize handle (bottom-right) */}
-      <motion.div
-        onPointerDown={handlePointerDown}
-        className="absolute bg-blue-500 rounded-full cursor-se-resize"
-        style={{
-          width: HANDLE_SIZE,
-          height: HANDLE_SIZE,
-          left: boundingBox.left + boundingBox.width - HANDLE_SIZE / 2,
-          top: boundingBox.top + boundingBox.height - HANDLE_SIZE / 2,
+          position: "absolute",
+          width: 12,
+          height: 12,
+          background: "#3b82f6",
+          right: -6,
+          bottom: -6,
+          cursor: "nwse-resize",
+          pointerEvents: "auto",
         }}
       />
     </div>

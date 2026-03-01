@@ -1,9 +1,9 @@
 "use client"
 
-"use client"
-
 import React from "react"
-import { useBuilderStore } from "@/state/builderStore"
+import { useBuilderStore } from "@/builder/state/builderStore"
+import { BuilderPage } from "@lib/exporter/schema"
+import { v4 as uuidv4 } from "uuid"
 
 export default function PageTree() {
   const { pages, activePageId, switchPage, setSchema } = useBuilderStore()

@@ -9,7 +9,7 @@
 // lib/utils/alignmentEngine.ts
 // AI App Builder Pro — Figma-Level Alignment Engine
 
-import { BuilderComponent } from "@/lib/exporter/schema"
+import { BuilderComponent } from "@lib/exporter/schema"
 
 /* ============================================================
    TYPES

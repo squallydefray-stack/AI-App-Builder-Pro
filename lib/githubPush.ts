@@ -1,27 +1,33 @@
-//
-//  githubPush.ts
-//  AI-App-Builder-Pro
-//
-//  Created by Squally Da Boss on 2/17/26.
-//
-
+// githubPush.ts
+// AI-App-Builder-Pro
 
 import simpleGit from "simple-git"
 
-interface GitPushOptions {
-  repo: string
+export interface GitPushOptions {
   branch: string
   commitMessage: string
+  schema?: any               // allow passing BuilderSchema
+  platform?: "nextjs" | "reactnative"  // optional platform
+  repo?: string              // optional repo override
 }
 
 export async function pushToGitHub(options: GitPushOptions) {
   try {
-    const git = simpleGit()
+    const { branch, commitMessage, schema } = options
+
+    // Optional: use schema to generate files before committing
+    if (schema) {
+      // e.g., fs.writeFileSync("builder-schema.json", JSON.stringify(schema, null, 2))
+      console.log("Schema ready for export:", schema)
+    }
+
+    const git = simpleGit(options.repo)
     await git.add(".")
-    await git.commit(options.commitMessage)
-    await git.push("origin", options.branch)
+    await git.commit(commitMessage)
+    await git.push("origin", branch)
+
     return { success: true }
   } catch (err: any) {
-    return { success: false, message: err.message }
+    return { success: false, error: err.message }
   }
 }

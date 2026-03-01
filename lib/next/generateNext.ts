@@ -1,6 +1,6 @@
 // export/next/generateNext.ts
 import { BuilderPage, BuilderComponent } from "@lib/exporter/schema"
-import { componentTemplates } from "./componentTemplates"
+import { componentTemplates } from "@lib/layout/componentTemplates"
 import { v4 as uuid } from "uuid"
 
 interface ProjectFile {

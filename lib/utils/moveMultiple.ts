@@ -7,7 +7,7 @@
 
 
 import { BuilderComponent } from "@lib/exporter/schema"
-import { moveNode } from "./treeHelper"
+import { moveNode } from "@/builder/utils/treeHelper"
 
 export function moveMultiple(
   tree: BuilderComponent[],

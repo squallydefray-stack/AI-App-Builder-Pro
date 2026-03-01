@@ -1,7 +1,7 @@
 // app/builder/canvas/ResizerOverlay.tsx
 "use client"
 import React, { useState } from "react"
-import { useBuilderStore } from "@/state/builderStore"
+import { useBuilderStore } from "@/builder/state/builderStore"
 
 interface Props {
   selectedIds: string[]

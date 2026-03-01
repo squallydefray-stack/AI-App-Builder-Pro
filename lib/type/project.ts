@@ -5,7 +5,7 @@
 //  Created by Squally Da Boss on 2/14/26.
 //
 
-import { generateThumbnail } from "@/lib/utils/generateThumbnail"
+import { generateThumbnail } from "@lib/utils/generateThumbnail"
 
 export type ProjectVersion = {
   pages: any[]

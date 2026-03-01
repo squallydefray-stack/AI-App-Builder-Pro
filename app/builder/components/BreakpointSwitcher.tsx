@@ -2,7 +2,7 @@
 "use client"
 
 import React from "react"
-import { useBuilderStore } from "@state/builderStore"
+import { useBuilderStore } from "@/builder/state/builderStore"
 
 export const BreakpointSwitcher: React.FC = () => {
   const { activeBreakpoint, setActiveBreakpoint } = useBuilderStore()

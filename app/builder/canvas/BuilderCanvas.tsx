@@ -1,110 +1,70 @@
 "use client"
 
-import React, { useEffect } from "react"
-import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
-import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable"
-import { NodeRenderer } from "./NodeRenderer"
-import { useBuilderStore } from "../state/builderStore"
+import React from "react"
+import { DndContext } from "@dnd-kit/core"
+import { BuilderComponent, BuilderPage, Breakpoint } from "@lib/exporter/schema"
+import {
+  applyLayoutTree,
+  applySnapToComponents,
+  generateSnapGuides,
+  SnapGuide,
+} from "@/builder/lib/layoutUtils"
+import { NodeRenderer } from "@/builder/canvas/NodeRenderer"
 
-export default function BuilderCanvas() {
-  const schema = useBuilderStore((s) => s.schema)
-  const reorderComponents = useBuilderStore((s) => s.reorderComponentsByArray)
-  const moveComponentInto = useBuilderStore((s) => s.moveComponentInto)
-  const undo = useBuilderStore((s) => s.undo)
-  const redo = useBuilderStore((s) => s.redo)
-  const setDropTarget = useBuilderStore((s) => s.setDropTarget)
+interface BuilderCanvasProps {
+  page: BuilderPage
+  activeBreakpoint: Breakpoint
+  sensors?: any[]
+  multiSelect?: boolean
+}
 
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.metaKey || e.ctrlKey) {
-        if (e.key === "z") { e.preventDefault(); undo() }
-        if (e.key === "y" || (e.shiftKey && e.key === "Z")) { e.preventDefault(); redo() }
-      }
-    }
-    window.addEventListener("keydown", handler)
-    return () => window.removeEventListener("keydown", handler)
-  }, [undo, redo])
-
-  // Helper
-  function findNode(components: any[], id: string): any | null {
-    for (const c of components) {
-      if (c.id === id) return c
-      if (c.children) {
-        const found = findNode(c.children, id)
-        if (found) return found
-      }
-    }
-    return null
-  }
-
-  function isDescendant(node: any, potentialParent: any): boolean {
-    if (!potentialParent.children) return false
-    for (const child of potentialParent.children) {
-      if (child.id === node.id) return true
-      if (isDescendant(node, child)) return true
-    }
-    return false
-  }
-
+export function BuilderCanvas({
+  page,
+  activeBreakpoint,
+  sensors = [],
+}: BuilderCanvasProps) {
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragOver={(event) => {
-        const { active, over } = event
-        if (!over) { setDropTarget(null, null); return }
-        const activeId = active.id as string
-        const overId = over.id as string
-        if (activeId === overId) { setDropTarget(null, null); return }
+    <div className="relative bg-white border rounded min-h-[800px]">
+      <DndContext sensors={sensors}>
+        {page.components.map((component) => {
+          const laidOut = applyLayoutTree(component, activeBreakpoint)
+          const snapped = applySnapToComponents(
+            laidOut,
+            page.components,
+            activeBreakpoint
+          )
+          const guides: SnapGuide[] = generateSnapGuides(
+            snapped,
+            page.components,
+            activeBreakpoint
+          )
 
-        const activeNode = findNode(schema.pages[0].components, activeId)
-        const overNode = findNode(schema.pages[0].components, overId)
-        if (!activeNode || !overNode) { setDropTarget(null, null); return }
-        if (isDescendant(activeNode, overNode)) { setDropTarget(null, null); return }
+          return (
+            <React.Fragment key={component.id}>
+              <NodeRenderer
+                component={snapped}
+                breakpoint={activeBreakpoint}
+              />
 
-        const pointerY = event.pointerY
-        const overRect = over.rect
-        const offsetY = pointerY - overRect.top
-        const third = overRect.height / 3
-        let position: "inside" | "above" | "below" = "inside"
-        if (offsetY < third) position = "above"
-        else if (offsetY > third * 2) position = "below"
-
-        setDropTarget(overId, position)
-      }}
-      onDragEnd={(event) => {
-        const { active, over } = event
-        setDropTarget(null, null)
-        if (!over) return
-        const activeId = active.id as string
-        const overId = over.id as string
-        const activeNode = findNode(schema.pages[0].components, activeId)
-        const overNode = findNode(schema.pages[0].components, overId)
-        if (!activeNode || !overNode) return
-        if (isDescendant(activeNode, overNode)) return
-
-        const position = dropTarget.position || "inside"
-        if (position === "inside") moveComponentInto(activeId, overId)
-        else {
-          const components = [...schema.pages[0].components]
-          const oldIndex = components.findIndex(c => c.id === activeId)
-          let newIndex = components.findIndex(c => c.id === overId)
-          if (position === "below") newIndex += 1
-          const newArray = arrayMove(components, oldIndex, newIndex)
-          reorderComponents(newArray)
-        }
-      }}
-    >
-      <SortableContext
-        items={schema.pages[0].components.map(c => c.id)}
-        strategy={verticalListSortingStrategy}
-      >
-        {schema.pages[0].components.map(c => (
-          <NodeRenderer key={c.id} component={c} />
-        ))}
-      </SortableContext>
-    </DndContext>
+              {guides.map((guide, i) =>
+                guide.axis === "x" ? (
+                  <div
+                    key={`x-${i}`}
+                    className="absolute top-0 bottom-0 w-px bg-blue-400 pointer-events-none"
+                    style={{ left: guide.value }}
+                  />
+                ) : (
+                  <div
+                    key={`y-${i}`}
+                    className="absolute left-0 right-0 h-px bg-blue-400 pointer-events-none"
+                    style={{ top: guide.value }}
+                  />
+                )
+              )}
+            </React.Fragment>
+          )
+        })}
+      </DndContext>
+    </div>
   )
 }

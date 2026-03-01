@@ -10,7 +10,7 @@
 "use client"
 
 import { BuilderComponent, BuilderPage } from "@lib/exporter/schema"
-import { useBuilderStore } from "@builder/state/builderStore"
+import { useBuilderStore } from "@/builder/state/builderStore"
 
 /**
  * Recursively add components to the page

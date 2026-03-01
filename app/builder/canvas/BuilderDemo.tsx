@@ -1,13 +1,23 @@
-import PropsInspector from "@builderComponents/PropsInspector"
+// app/builder/canvas/BuilderDemo.tsx
+"use client"
+
+import React, { useState } from "react"
+import { BuilderCanvas } from "@/builder/canvas/BuilderCanvas"
+import PropsInspector from "@/builder/components/PropsInspector"
+import { useBuilderStore } from "@/builder/state/builderStore"
 
 export default function BuilderDemo() {
-  const [currentBreakpoint, setCurrentBreakpoint] = useState<"desktop" | "tablet" | "mobile">("desktop")
-  const setBreakpoint = useBuilderStore((s) => s.setBreakpoint)
-  const selectedId = useBuilderStore((s) => s.selectedId)
+  const [currentBreakpoint, setCurrentBreakpoint] = useState<"base" | "tablet" | "mobile">("base")
+  const setActiveBreakpoint = useBuilderStore((s) => s.setActiveBreakpoint)
+  const selectedIds = useBuilderStore((s) => s.selectedIds)
+  const pages = useBuilderStore((s) => s.pages)
+  const activePageId = useBuilderStore((s) => s.activePageId)
 
-  const switchBreakpoint = (bp: "desktop" | "tablet" | "mobile") => {
+  const activePage = pages.find((p) => p.id === activePageId)
+
+  const switchBreakpoint = (bp: "base" | "tablet" | "mobile") => {
     setCurrentBreakpoint(bp)
-    setBreakpoint(bp)
+    setActiveBreakpoint(bp)
   }
 
   return (
@@ -15,39 +25,50 @@ export default function BuilderDemo() {
       {/* Toolbar */}
       <div className="flex items-center justify-between p-2 bg-gray-100 border-b">
         <div className="flex space-x-2">
-          <button
-            className={`px-3 py-1 rounded ${currentBreakpoint === "desktop" ? "bg-blue-500 text-white" : "bg-white border"}`}
-            onClick={() => switchBreakpoint("desktop")}
-          >
-            Desktop
-          </button>
-          <button
-            className={`px-3 py-1 rounded ${currentBreakpoint === "tablet" ? "bg-blue-500 text-white" : "bg-white border"}`}
-            onClick={() => switchBreakpoint("tablet")}
-          >
-            Tablet
-          </button>
-          <button
-            className={`px-3 py-1 rounded ${currentBreakpoint === "mobile" ? "bg-blue-500 text-white" : "bg-white border"}`}
-            onClick={() => switchBreakpoint("mobile")}
-          >
-            Mobile
-          </button>
+          {(["base", "tablet", "mobile"] as const).map((bp) => (
+            <button
+              key={bp}
+              className={`px-3 py-1 rounded ${
+                currentBreakpoint === bp ? "bg-blue-500 text-white" : "bg-white border"
+              }`}
+              onClick={() => switchBreakpoint(bp)}
+            >
+              {bp.charAt(0).toUpperCase() + bp.slice(1)}
+            </button>
+          ))}
         </div>
 
         <div>
-          {selectedId ? <span className="text-sm text-gray-700">Selected: {selectedId}</span> : <span className="text-sm text-gray-500">No selection</span>}
+          {selectedIds[0] ? (
+            <span className="text-sm text-gray-700">Selected: {selectedIds[0]}</span>
+          ) : (
+            <span className="text-sm text-gray-500">No selection</span>
+          )}
         </div>
       </div>
 
       {/* Main Canvas + Props */}
       <div className="flex flex-1 overflow-hidden">
+        {/* Canvas */}
         <div className="flex-1 overflow-auto p-4 bg-gray-50">
-          <Canvas />
+          {activePage ? (
+            <BuilderCanvas page={activePage} multiSelect={true} />
+          ) : (
+            <div className="text-gray-400 text-center mt-20">No page selected</div>
+          )}
         </div>
 
         {/* Props Inspector Panel */}
-        <PropsInspector />
+        <div className="w-80 border-l bg-white overflow-y-auto">
+          {selectedIds.length > 0 && activePage ? (
+            <PropsInspector
+              component={useBuilderStore.getState().getSelected()[0]}
+              breakpoint={currentBreakpoint}
+            />
+          ) : (
+            <div className="text-gray-400 text-center mt-4">Select a component</div>
+          )}
+        </div>
       </div>
     </div>
   )

@@ -2,8 +2,8 @@
 "use client"
 import React from "react"
 import { useBuilderStore } from "@/state/builderStore"
-import NodeRenderer from "./NodeRenderer"
-import { applyAlignment } from "../lib/alignmentTools"
+import NodeRenderer from "@builder/canvas/NodeRenderer"
+import { applyAlignment } from "@/lib/alignmentTools"
 
 export default function AlignmentToolsPage() {
   const pages = useBuilderStore((s) => s.pages)

@@ -5,7 +5,6 @@
 //  Created by Squally Da Boss on 2/17/26.
 //
 
-
 "use client"
 
 import React, { useRef, useState, useEffect, useCallback } from "react"
@@ -20,14 +19,14 @@ import {
   MeasuringStrategy,
 } from "@dnd-kit/core"
 import { AnimatePresence, motion } from "framer-motion"
-import { useBuilderStore } from "@/state/builderStore"
-import NodeRenderer from "./NodeRenderer"
-import MultiSelectResizer from "./MultiSelectResizer"
-import ExportFeedbackPanel from "./ExportFeedbackPanel"
+import { useBuilderStore } from "@/builder/state/builderStore"
+import NodeRenderer from "@/builder/canvas/NodeRenderer"
+import MultiSelectResizer from "@/builder/components/MultiSelectResizer"
+import ExportFeedbackPanel from "@/builder/canvas/ExportFeedbackPanel"
 import { BuilderComponent, BuilderSchema } from "@lib/exporter/schema"
-import { applyConstraints } from "@/lib/utils/constraintSolver"
-import { reflowAutoLayout, expandRepeaters } from "@/lib/utils/autoLayoutEngine"
-import { convertToNextTailwind, convertToReactNative } from "@/lib/exporter/codeGenerator"
+import { applyConstraints } from "@lib/utils/constraintSolver"
+import { reflowAutoLayout, expandRepeaters } from "@lib/utils/autoLayoutEngine"
+import { convertToNextTailwind, convertToReactNative } from "@lib/exporter/codeGenerator"
 
 interface SnapLine { x?: number; y?: number }
 interface SpacingHint { x?: number; y?: number; value: number }
@@ -43,7 +42,7 @@ export default function CrossPlatformLivePreview() {
     toggleSelect,
     updateMultipleComponents,
     zoom,
-  } = useBuilderStore()
+  } = useBuilderStore.getState()
   const page = pages.find(p => p.id === activePageId)
   const [snapLines, setSnapLines] = useState<SnapLine[]>([])
   const [spacingHints, setSpacingHints] = useState<SpacingHint[]>([])
@@ -51,7 +50,9 @@ export default function CrossPlatformLivePreview() {
   const [platform, setPlatform] = useState<"nextjs" | "reactnative">("nextjs")
   const [liveExportCode, setLiveExportCode] = useState<string>("")
 
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  )
 
   if (!page) return <div>No page selected</div>
 
@@ -66,10 +67,12 @@ export default function CrossPlatformLivePreview() {
   const handleDragMove = useCallback(
     (event: DragMoveEvent) => {
       if (!containerRef.current) return
-      const draggedEl = document.getElementById(event.active.id)
+
+      const activeId = String(event.active.id)
+      const draggedEl = document.getElementById(activeId)
       if (!draggedEl) return
 
-      const multiSelected = selectedIds.includes(event.active.id) ? selectedIds : [event.active.id]
+      const multiSelected = selectedIds.includes(activeId) ? selectedIds : [activeId]
       setDraggingIds(multiSelected)
 
       const lines: SnapLine[] = []
@@ -101,31 +104,88 @@ export default function CrossPlatformLivePreview() {
     [page.components, selectedIds, updateMultipleComponents]
   )
 
-  const handleDragEnd = useCallback(
-    (event: DragEndEvent) => {
-      setSnapLines([])
-      setSpacingHints([])
-      setDraggingIds([])
-      const multiSelected = selectedIds.includes(event.active.id) ? selectedIds : [event.active.id]
+    // -------------------------
+    // Drag Move + Snap + AutoLayout
+    // -------------------------
+    const handleDragMove = useCallback(
+      (event: DragMoveEvent) => {
+        if (!containerRef.current) return
 
-      const moveComponents = (components: BuilderComponent[]): BuilderComponent[] => {
-        let moved: BuilderComponent[] = []
-        const filtered = components.filter((c) => {
-          if (multiSelected.includes(c.id)) {
-            moved.push(c)
-            return false
-          }
-          if (c.children) c.children = moveComponents(c.children)
-          return true
+        const activeId = String(event.active.id) // ✅ normalize to string
+        const draggedEl = document.getElementById(activeId)
+        if (!draggedEl) return
+
+        const multiSelected = selectedIds.includes(activeId) ? selectedIds : [activeId]
+        setDraggingIds(multiSelected)
+
+        const lines: SnapLine[] = []
+        const hints: SpacingHint[] = []
+
+        const allEls = Array.from(containerRef.current.querySelectorAll<HTMLElement>("[data-builder-id]"))
+        multiSelected.forEach((id) => {
+          const elA = document.getElementById(id)
+          if (!elA) return
+          allEls.forEach((elB) => {
+            if (multiSelected.includes(elB.dataset.builderId!)) return
+            const rectA = elA.getBoundingClientRect()
+            const rectB = elB.getBoundingClientRect()
+            if (Math.abs(rectA.left - rectB.left) < SNAP_THRESHOLD) lines.push({ x: rectB.left })
+            if (Math.abs(rectA.top - rectB.top) < SNAP_THRESHOLD) lines.push({ y: rectB.top })
+            const hSpacing = Math.abs(rectB.left - rectA.right)
+            const vSpacing = Math.abs(rectB.top - rectA.bottom)
+            if (hSpacing > 0 && hSpacing < 200) hints.push({ x: rectA.right, value: hSpacing })
+            if (vSpacing > 0 && vSpacing < 200) hints.push({ y: rectA.bottom, value: vSpacing })
+          })
         })
-        return [...filtered, ...moved]
-      }
 
-      const reflowed = reflowAutoLayout(moveComponents([...page.components]), containerRef.current!.clientWidth, containerRef.current!.clientHeight)
-      updateMultipleComponents(reflowed)
-    },
-    [page.components, selectedIds, updateMultipleComponents]
-  )
+        setSnapLines(lines)
+        setSpacingHints(hints)
+
+          
+            const reflowed = reflowAutoLayout(
+              [...page.components],
+              containerRef.current.clientWidth,
+              containerRef.current.clientHeight,
+              activeBreakpoint
+            )
+            updateMultipleComponents(reflowed)
+      [page.components, selectedIds, updateMultipleComponents]
+    )
+
+    // -------------------------
+    // Drag End
+    // -------------------------
+    const handleDragEnd = useCallback(
+      (event: DragEndEvent) => {
+        setSnapLines([])
+        setSpacingHints([])
+        setDraggingIds([])
+
+        const activeId = String(event.active.id) // ✅ normalize to string
+        const multiSelected = selectedIds.includes(activeId) ? selectedIds : [activeId]
+
+        const moveComponents = (components: BuilderComponent[]): BuilderComponent[] => {
+          let moved: BuilderComponent[] = []
+          const filtered = components.filter((c) => {
+            if (multiSelected.includes(c.id)) {
+              moved.push(c)
+              return false
+            }
+            if (c.children) c.children = moveComponents(c.children)
+            return true
+          })
+          return [...filtered, ...moved]
+        }
+
+        const reflowed = reflowAutoLayout(
+          moveComponents([...page.components]),
+          containerRef.current!.clientWidth,
+          containerRef.current!.clientHeight
+        )
+        updateMultipleComponents(reflowed)
+      },
+      [page.components, selectedIds, updateMultipleComponents]
+    )
 
   // -------------------------
   // Live Export Code Generation per Platform
@@ -143,21 +203,32 @@ export default function CrossPlatformLivePreview() {
   const renderComponent = useCallback(
     (comp: BuilderComponent) => {
       const isSelected = selectedIds.includes(comp.id)
-      const constrained = applyConstraints(comp, containerRef.current?.clientWidth || 800, containerRef.current?.clientHeight || 600)
+      const constrained = applyConstraints(
+        comp,
+        containerRef.current?.clientWidth || 800,
+        containerRef.current?.clientHeight || 600,
+        "base"
+      )
+
       return (
         <div
           key={comp.id}
           data-builder-id={comp.id}
           onClick={(e) => { e.stopPropagation(); handleClick(comp.id, e) }}
           style={{
-            width: constrained.width,
-            height: constrained.height,
+            width: constrained.propsPerBreakpoint.base.width,
+            height: constrained.propsPerBreakpoint.base.height,
             position: "relative",
             transition: "all 0.1s ease-in-out",
             boxShadow: isSelected ? "0 0 0 2px #3b82f6" : "none",
           }}
         >
-          <NodeRenderer component={comp} parentWidth={constrained.width} parentHeight={constrained.height} platform={platform} />
+          <NodeRenderer
+            component={comp}
+            parentWidth={constrained.propsPerBreakpoint.base.width}
+            parentHeight={constrained.propsPerBreakpoint.base.height}
+            platform={platform}
+          />
           {comp.children?.map(renderComponent)}
         </div>
       )

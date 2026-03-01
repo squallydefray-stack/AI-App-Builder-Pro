@@ -7,7 +7,7 @@
 
 
 // utils/componentCounter.ts
-import { BuilderComponent } from "../lib/exporter/schema"
+import { BuilderComponent } from "@lib/exporter/schema"
 
 // Flatten tree to count all nodes
 export const countComponents = (nodes: BuilderComponent[]): number => {

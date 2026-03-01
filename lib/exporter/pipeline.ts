@@ -11,8 +11,8 @@ import path from "path"
 import { writeProjectFiles } from "./fileWriter"
 import { zipFolder } from "./zipHelper"
 import { generateAppFiles } from "./generateAppFiles"
-import { getGithubToken } from "@/lib/github/auth"
-import { createGithubRepo, pushFilesToGithub } from "@/lib/github/client"
+import { getGithubToken } from "@lib/github/auth"
+import { createGithubRepo, pushFilesToGithub } from "@lib/github/client"
 
 export async function exportPipeline(req: Request, progress: (msg: string) => Promise<void>) {
   try {

@@ -1,6 +1,6 @@
 // lib/renderer/renderNode.ts
 
-import { BuilderComponent } from "@/lib/schema/componentTypes"
+import { BuilderComponent } from "@lib/schema/componentTypes"
 
 export function renderNode(node: BuilderComponent): string {
   const children =

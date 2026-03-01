@@ -1,10 +1,17 @@
+// app/builder/canvas/CanvasCollabOverlay.tsx
 "use client"
 
 import React, { useEffect, useState } from "react"
-import { useBuilderStore } from "@/state/builderStore"
+import { useBuilderStore } from "@/builder/state/builderStore"
+
+interface CollabHighlight {
+  userId: string
+  color: string
+  highlightedIds: string[]
+}
 
 export const CanvasCollabOverlay = () => {
-  const collabHighlights = useBuilderStore((s) => s.collabHighlights)
+  const collabHighlights = useBuilderStore((s) => s.collabHighlights || [])
   const schema = useBuilderStore((s) => s.schema)
 
   const [overlayPositions, setOverlayPositions] = useState<
@@ -12,12 +19,19 @@ export const CanvasCollabOverlay = () => {
   >([])
 
   useEffect(() => {
+    if (!schema) return
+
     const positions: { rect: DOMRect; color: string; key: string }[] = []
 
     collabHighlights.forEach((user) => {
       user.highlightedIds.forEach((id) => {
         const el = document.getElementById(id)
-        if (el) positions.push({ rect: el.getBoundingClientRect(), color: user.color, key: `${user.userId}-${id}` })
+        if (el)
+          positions.push({
+            rect: el.getBoundingClientRect(),
+            color: user.color,
+            key: `${user.userId}-${id}`,
+          })
       })
     })
 
@@ -38,7 +52,8 @@ export const CanvasCollabOverlay = () => {
             borderRadius: "0.5rem",
             background: `radial-gradient(circle, ${color} 0%, transparent 70%)`,
             filter: "blur(8px)",
-            animation: "breathe 1.2s ease-in-out forwards, hueShift 2s linear infinite, trailPulse 1.5s ease-in-out forwards",
+            animation:
+              "breathe 1.2s ease-in-out forwards, hueShift 2s linear infinite, trailPulse 1.5s ease-in-out forwards",
           }}
         />
       ))}

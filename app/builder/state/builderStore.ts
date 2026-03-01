@@ -1,100 +1,150 @@
-// builderStore.ts
+// app/builder/state/builderStore.ts
 "use client"
 
 import { create } from "zustand"
-import { BuilderPage, BuilderComponent } from "@lib/exporter/schema"
-import { produce } from "immer"
-import * as Y from "yjs"
-import { WebsocketProvider } from "y-websocket"
+import { BuilderComponent, Breakpoint, BuilderPage } from "@/lib/exporter/schema"
+import { AICommandToNextJSResponsive } from "@/lib/ai/AIToNextResponsivePipeline"
+import { runAICommand as runAICommandRaw } from "@/builder/ai/AIIntegration"
 
-type Breakpoint = "base" | "tablet" | "mobile"
-
-interface CollaborationState {
-  ydoc?: Y.Doc
-  provider?: WebsocketProvider
-  ypages?: Y.Array<BuilderPage>
-}
-
-interface BuilderStore extends CollaborationState {
+export interface BuilderStore {
   pages: BuilderPage[]
-  activePageId: string | null
-  selectedIds: string[]
+  activePageId: string
   activeBreakpoint: Breakpoint
-  dragHandlers: Record<string, any>
+  selectedIds: string[]
+  gridEnabled: boolean
+  gridSize: number
 
-  switchPage: (id: string) => void
-  setSchema: (schema: { pages: BuilderPage[] }) => void
-  snapshot: () => BuilderPage[]
-
-  addComponent: (comp: BuilderComponent) => void
-  updateComponentProps: (compId: string, props: any, breakpoint?: Breakpoint) => void
-  setSelectedIds: (ids: string[]) => void
-
+  // ----------------- Actions -----------------
   setActiveBreakpoint: (bp: Breakpoint) => void
+  setSelectedIds: (ids: string[]) => void
+  toggleGrid: () => void
+  setGridSize: (size: number) => void
 
-  initCollaboration?: (collab: CollaborationState) => void
-  getSnapshotForExport: () => BuilderPage[]
+  addComponent: (component: BuilderComponent, parentId: string | null) => void
+  addComponentsTransactional: (components: BuilderComponent[]) => void
+  updateMany: (components: BuilderComponent[]) => void
+
+  // AI integration
+  runAICommand: (command: string) => Promise<void>
 }
 
 export const useBuilderStore = create<BuilderStore>((set, get) => ({
-  pages: [],
-  activePageId: null,
-  selectedIds: [],
+  pages: [
+    {
+      id: "page-1",
+      name: "Main Page",
+      components: [],
+    },
+  ],
+  activePageId: "page-1",
   activeBreakpoint: "base",
-  dragHandlers: {},
+  selectedIds: [],
+  gridEnabled: true,
+  gridSize: 8,
 
-  switchPage: (id) => set({ activePageId: id }),
-  setSchema: ({ pages }) => set({ pages }),
-  snapshot: () => JSON.parse(JSON.stringify(get().pages)) as BuilderPage[],
+runAICommand: async (prompt: string) => {
+  const { activeBreakpoint, addComponentsTransactional } = get()
 
-  addComponent: (comp: BuilderComponent) => {
-    const { pages, activePageId, activeBreakpoint } = get()
-    if (!activePageId) return
+  // 1️⃣ Parse AI into structured components
+  const result = await parseAICommandToComponents(prompt)
 
-    const compWithBP = {
-      ...comp,
-      propsPerBreakpoint: {
-        [activeBreakpoint]: {
-          x: comp.props?.x || 0,
-          y: comp.props?.y || 0,
-          width: comp.props?.width || 200,
-          height: comp.props?.height || 100,
-          ...comp.props,
-        },
-      },
-      children: comp.children || [],
-    }
+  if (!result?.components?.length) return
 
-    set({
-      pages: pages.map((p) =>
-        p.id === activePageId
-          ? { ...p, components: [...(p.components || []), compWithBP] }
-          : p
-      ),
+  // 2️⃣ Compile each component through layout compiler
+  const compiled = result.components.map((comp) =>
+    compileStructuredPlan(comp, {
+      canvasWidth:
+        activeBreakpoint === "base"
+          ? 1440
+          : activeBreakpoint === "tablet"
+          ? 1024
+          : 375,
+      canvasHeight: 900,
+      snapThreshold: 8,
+      snapToGrid: true,
+      gridSize: get().gridSize,
+    })
+  )
+
+  // 3️⃣ Insert into active page
+  addComponentsTransactional(compiled)
+},
+
+  // ----------------- UI State -----------------
+  setActiveBreakpoint: (bp: Breakpoint) => set({ activeBreakpoint: bp }),
+  setSelectedIds: (ids: string[]) => set({ selectedIds: ids }),
+  toggleGrid: () => set((s) => ({ gridEnabled: !s.gridEnabled })),
+  setGridSize: (size: number) => set({ gridSize: size }),
+
+  // ----------------- Component Management -----------------
+  addComponent: (component, parentId) => {
+    set((state) => {
+      const pageIndex = state.pages.findIndex((p) => p.id === state.activePageId)
+      if (pageIndex === -1) return state
+      const page = state.pages[pageIndex]
+
+      // If parentId provided, add as child
+      if (parentId) {
+        const addChild = (components: BuilderComponent[]): BuilderComponent[] =>
+          components.map((c) => {
+            if (c.id === parentId) {
+              const children = c.children ? [...c.children, component] : [component]
+              return { ...c, children }
+            }
+            if (c.children) {
+              return { ...c, children: addChild(c.children) }
+            }
+            return c
+          })
+
+        page.components = addChild(page.components)
+      } else {
+        // Add to root
+        page.components = [...page.components, component]
+      }
+
+      const pages = [...state.pages]
+      pages[pageIndex] = { ...page }
+      return { pages }
     })
   },
 
-  updateComponentProps: (compId, props, breakpoint) => {
-    const bp = breakpoint || get().activeBreakpoint
-    set(
-      produce((state: BuilderStore) => {
-        const updateRecursive = (components: BuilderComponent[]) => {
-          components.forEach((comp) => {
-            if (comp.id === compId) {
-              if (!comp.propsPerBreakpoint) comp.propsPerBreakpoint = {}
-              comp.propsPerBreakpoint[bp] = { ...(comp.propsPerBreakpoint[bp] || {}), ...props }
-            }
-            if (comp.children) updateRecursive(comp.children)
-          })
-        }
-        state.pages.forEach((page) => updateRecursive(page.components || []))
-      })
-    )
+  addComponentsTransactional: (components) => {
+    components.forEach((c) => get().addComponent(c, null))
   },
 
-  setSelectedIds: (ids) => set({ selectedIds: ids }),
-  setActiveBreakpoint: (bp) => set({ activeBreakpoint: bp }),
+  updateMany: (components) => {
+    set((state) => {
+      const pageIndex = state.pages.findIndex((p) => p.id === state.activePageId)
+      if (pageIndex === -1) return state
+      const page = state.pages[pageIndex]
 
-  initCollaboration: ({ ydoc, provider, ypages }) => set({ ydoc, provider, ypages }),
-  getSnapshotForExport: () => get().pages,
+      const updateTree = (tree: BuilderComponent[]): BuilderComponent[] =>
+        tree.map((c) => {
+          const match = components.find((u) => u.id === c.id)
+          const updated = match ? { ...c, ...match } : c
+          if (c.children) {
+            updated.children = updateTree(c.children)
+          }
+          return updated
+        })
+
+      const updatedComponents = updateTree(page.components)
+      const pages = [...state.pages]
+      pages[pageIndex] = { ...page, components: updatedComponents }
+      return { pages }
+    })
+  },
+
+  // ----------------- AI Integration -----------------
+  runAICommand: async (command: string) => {
+    const result = await runAICommandRaw(command)
+    // runAICommandRaw should return BuilderComponent[]
+    if (result?.components && Array.isArray(result.components)) {
+      get().addComponentsTransactional(result.components)
+    } else if (Array.isArray(result)) {
+      // fallback for older format
+      get().addComponentsTransactional(result)
+    }
+  },
 }))

@@ -1,58 +1,67 @@
 // lib/exporter/constraints.ts
-import { BuilderComponent } from "@lib/exporter/schema"
+//
+//  constraints.ts
+//  AI-App-Builder-Pro
+//
+//  Created by Squally Da Boss on 2/24/26.
+//
+
+import { BuilderComponent, Breakpoint, StyleProps } from "@lib/exporter/schema"
 
 /**
- * Compute resolved layout for a single node, respecting fill/hug/fixed constraints
- * recursively for nested children.
+ * Safely applies horizontal and vertical constraints to a component for a given breakpoint.
+ * Automatically fills in missing x, y, width, height with defaults.
  */
-export function applyConstraintsToNode(node: BuilderComponent): any {
-  const base = node.props.base || {}
-  let width = base.width
-  let height = base.height
-  let display = "block"
-  let flexDirection: "row" | "column" = "column"
-  let justifyContent: string = "flex-start"
-  let alignItems: string = "flex-start"
-  let gap = base.gap || 0
-  let padding = base.padding || 0
-  let x = base.x || 0
-  let y = base.y || 0
+export function applyConstraints(
+  component: BuilderComponent,
+  parentWidth: number,
+  parentHeight: number,
+  breakpoint: Breakpoint
+): BuilderComponent {
+  // Ensure propsPerBreakpoint exists
+  const existingProps: StyleProps = component.propsPerBreakpoint[breakpoint] ?? {}
 
-  // Handle AutoLayout for flex parents
-  if (node.props.base?.layout === "auto") {
-    display = "flex"
-    flexDirection = node.props.base?.direction || "column"
-    justifyContent = node.props.base?.justify || "flex-start"
-    alignItems = node.props.base?.align || "flex-start"
+  // Fill defaults if missing
+  const safeProps: StyleProps = {
+    x: existingProps.x ?? 0,
+    y: existingProps.y ?? 0,
+    width: existingProps.width ?? 100,
+    height: existingProps.height ?? 50,
+    ...existingProps, // preserve other style props like color, borderRadius
+  }
 
-    // Fill/hug resolution
-    if (node.props.base?.widthMode === "fill") {
-      width = node.props.base?.parentWidth || 0
-    } else if (node.props.base?.widthMode === "hug") {
-      width = Math.max(...(node.children?.map(c => c.props.base?.width || 0) || [0]))
-    }
-
-    if (node.props.base?.heightMode === "fill") {
-      height = node.props.base?.parentHeight || 0
-    } else if (node.props.base?.heightMode === "hug") {
-      height = Math.max(...(node.children?.map(c => c.props.base?.height || 0) || [0]))
+  // If no constraints, just return the component with safe props
+  if (!component.layout?.constraints) {
+    return {
+      ...component,
+      propsPerBreakpoint: {
+        ...component.propsPerBreakpoint,
+        [breakpoint]: safeProps,
+      },
     }
   }
 
-  return { x, y, width, height, display, flexDirection, justifyContent, alignItems, gap, padding }
-}
+  const { horizontal, vertical } = component.layout.constraints
 
-/**
- * Analyze a page recursively with constraint solver applied
- */
-export function analyzeLayoutWithConstraints(nodes: BuilderComponent[]): BuilderComponent[] {
-  return nodes.map(node => {
-    const resolved = applyConstraintsToNode(node)
-    const newNode = { ...node, props: { ...node.props, resolved } }
+  // Apply horizontal constraints
+  if (horizontal === "right") {
+    safeProps.x = parentWidth - safeProps.width - (safeProps.x ?? 0)
+  } else if (horizontal === "center-x") {
+    safeProps.x = (parentWidth - safeProps.width) / 2
+  }
 
-    if (node.children?.length) {
-      newNode.children = analyzeLayoutWithConstraints(node.children)
-    }
-    return newNode
-  })
+  // Apply vertical constraints
+  if (vertical === "bottom") {
+    safeProps.y = parentHeight - safeProps.height - (safeProps.y ?? 0)
+  } else if (vertical === "center-y") {
+    safeProps.y = (parentHeight - safeProps.height) / 2
+  }
+
+  return {
+    ...component,
+    propsPerBreakpoint: {
+      ...component.propsPerBreakpoint,
+      [breakpoint]: safeProps,
+    },
+  }
 }

@@ -2,7 +2,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { useBuilderStore, BuilderPage } from "@state/builderStore"
+import { useBuilderStore, BuilderPage } from "@/builder/state/builderStore"
 
 export default function Sidebar() {
   const pages = useBuilderStore((s) => s.pages)

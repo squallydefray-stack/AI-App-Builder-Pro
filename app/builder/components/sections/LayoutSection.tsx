@@ -9,11 +9,11 @@
 "use client"
 
 import React from "react"
-import Collapsible from "../ui/Collapsible"
-import TokenSelect from "../ui/TokenSelect"
+import Collapsible from ""@/builder/ui/Collapsible"
+import TokenSelect from "@b/uilder/ui/TokenSelect"
 import { fontSizeTokens } from "@lib/design/tokens"
 import { BuilderComponent, Breakpoint } from "@lib/exporter/schema"
-import { useBuilderStore } from "@/state/builderStore"
+import { useBuilderStore } from ""@/builder/state/builderStore"
 
 interface Props {
   component: BuilderComponent

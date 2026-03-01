@@ -8,7 +8,7 @@
 
 // lib/drag/layoutResolver.ts
 
-import { getRectRegistry } from "./rectRegistry"
+import { getRectRegistry } from "@lib/drag/rectRegistry"
 
 export type LayoutDirection = "row" | "column"
 

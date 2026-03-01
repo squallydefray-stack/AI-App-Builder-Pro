@@ -1,6 +1,6 @@
 // lib/ai/layoutEngine.ts
 import { BuilderComponent, ResponsiveProps } from "@lib/exporter/schema";
-import { serializeStyles } from "../exporter/styleSerializer";
+import { serializeStyles } from "@lib/exporter/styleSerializer";
 
 /**
  * AI-Smart Layout Engine v2

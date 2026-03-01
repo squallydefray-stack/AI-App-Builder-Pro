@@ -1,12 +1,12 @@
 // lib/ai/layoutGenerator.ts
-import { BuilderPage, BuilderComponent } from "@lib/exporter/schema"
-import { analyzeLayout, autoLayoutSchema } from "./layoutEngine"
-
+import { BuilderPage, BuilderComponent, BuilderSchema } from "@lib/exporter/schema"
+import { analyzeLayout, autoLayoutSchema } from "@lib/ai/layoutEngine"
+import { generateLayoutFromPlan } from "@lib/ai/layoutGenerator"
 /**
- * Convert a structured AI plan into a BuilderPage schema
+ * Convert a structured AI plan into a full BuilderSchema
  * @param plan AI-generated structured plan JSON
  */
-export function generateLayoutFromPlan(plan: any): BuilderPage {
+export function generateLayoutFromPlan(plan: any): BuilderSchema {
   // Create top-level page
   const page: BuilderPage = {
     id: plan.id || "ai-page",
@@ -38,15 +38,29 @@ export function generateLayoutFromPlan(plan: any): BuilderPage {
   // Run auto-layout suggestions on the page components
   page.components = autoLayoutSchema(page.components)
 
-  return page
+  // Create full BuilderSchema
+  const schema: BuilderSchema = {
+    id: plan.id || "ai-schema",
+    name: plan.name || "AI Generated Schema",
+    pages: [page],
+    components: page.components, // optionally collect all top-level components
+  }
+
+  return schema
 }
 
 /**
  * Generate multiple pages from a full AI plan
- * Returns an array of BuilderPages
+ * Returns a BuilderSchema with multiple pages
  */
-export function generatePagesFromPlan(plan: any): BuilderPage[] {
-  if (!plan.pages || !Array.isArray(plan.pages)) return []
+export function generateSchemaFromPlan(plan: any): BuilderSchema {
+  const pages: BuilderPage[] = (plan.pages || []).map((p: any) => generateLayoutFromPlan(p).pages[0])
+  const allComponents: BuilderComponent[] = pages.flatMap((p) => p.components)
 
-  return plan.pages.map((p: any) => generateLayoutFromPlan(p))
+  return {
+    id: plan.id || "ai-schema-multi",
+    name: plan.name || "AI Generated Schema",
+    pages,
+    components: allComponents,
+  }
 }

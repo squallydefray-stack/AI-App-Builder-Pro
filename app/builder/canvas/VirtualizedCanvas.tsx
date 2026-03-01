@@ -12,7 +12,7 @@
 import React, { useRef, useMemo } from "react"
 import { FixedSizeList as List, ListChildComponentProps } from "react-window"
 import { BuilderComponent } from "@lib/exporter/schema"
-import NodeRenderer from "./NodeRenderer"
+import NodeRenderer from "@/builder/canvas/NodeRenderer"
 
 interface VirtualizedCanvasProps {
   components: BuilderComponent[]

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { useBuilderStore } from "@state/builderStore"
+import { useBuilderStore } from "@/builder/state/builderStore"
 
 interface DeployRecord {
   repoName: string

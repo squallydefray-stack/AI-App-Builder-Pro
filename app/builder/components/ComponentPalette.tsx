@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useEffect } from "react"
 import { BuilderComponent } from "@/lib/exporter/schema"
-import NodeRenderer from "./NodeRenderer"
+import NodeRenderer from "@/builder/canvas/NodeRenderer"
 
 interface ComponentPaletteProps {
   components: BuilderComponent[]
@@ -14,7 +14,6 @@ export default function ComponentPalette({ components }: ComponentPaletteProps) 
 
   useEffect(() => {
     if (ghostRef.current) {
-      // Hide ghost when not dragging
       ghostRef.current.style.display = draggingComp ? "block" : "none"
     }
   }, [draggingComp])
@@ -32,10 +31,8 @@ export default function ComponentPalette({ components }: ComponentPaletteProps) 
             e.dataTransfer.setData("application/json", JSON.stringify(newComp))
             e.dataTransfer.effectAllowed = "copy"
 
-            // Set current dragged component
             setDraggingComp(newComp)
 
-            // Set ghost preview
             if (ghostRef.current) {
               e.dataTransfer.setDragImage(ghostRef.current, 0, 0)
             }
@@ -53,9 +50,7 @@ export default function ComponentPalette({ components }: ComponentPaletteProps) 
         className="absolute top-0 left-0 pointer-events-none z-50"
         style={{ display: "none" }}
       >
-        {draggingComp && (
-          <NodeRenderer node={draggingComp} depth={0} breakpoint="desktop" />
-        )}
+        {draggingComp && <NodeRenderer component={draggingComp} animate />}
       </div>
     </div>
   )

@@ -7,13 +7,15 @@
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
-    "module": "ESNext",
+    "module": "esnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
     "forceConsistentCasingInFileNames": true,
+    "plugins": [{ "name": "next" }],
+
     "baseUrl": ".",
     "paths": {
       "@/*": ["app/*"],
@@ -21,22 +23,23 @@
       "@components/*": ["components/*"],
       "@builder/*": ["builder/*"],
       "@builderComponents/*": ["builder/components/*"],
-      "@canvas/*": ["builder/canvas/*"],
-      "@state/*": ["builder/store/*"],
       "@properties/*": ["builder/properties/*"],
+      "@state/*": ["builder/state/*"],
+      "@canvas/*": ["builder/canvas/*"],
+      "@store/*": ["builder/store/*"],
       "@ai/*": ["ai/*"],
       "@export/*": ["export/*"],
       "@server/*": ["server/*"],
-      "@plugins/*": ["plugins/*"]
-    },
-    "plugins": [
-      { "name": "next" }
-    ]
+      "@plugins/*": ["plugins/*"],
+      "@dashboard/*": ["dashboard/*"]
+    }
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts",
     "**/*.mts",
     "**/*.cts"
   ],

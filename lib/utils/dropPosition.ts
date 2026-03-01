@@ -1,7 +1,7 @@
 // lib/utils/dropPosition.ts
 // AI App Builder Pro — Smart Drop Position Resolver
 
-import { BuilderComponent } from "@/lib/exporter/schema"
+import { BuilderComponent } from "@lib/exporter/schema"
 
 export type DropResult = {
   containerId: string | null

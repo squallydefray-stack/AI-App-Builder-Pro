@@ -2,9 +2,9 @@
 "use client"
 
 import React from "react"
-import PageTree from "./pageTree"        // PageTree for page management
-import Canvas from "@builder/canvas/Canvas"
-import InspectorPanel from "@builderComponents/InspectorPanel"
+import PageTree from "@/builder/components/pageTree"        // PageTree for page management
+import Canvas from "@/builder/canvas/Canvas"
+import BuilderInspector from "@builder/components/InspectorPanel"
 
 export default function BuilderWorkspaceUI() {
   return (

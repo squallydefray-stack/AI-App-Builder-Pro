@@ -1,51 +1,27 @@
-/* =============================
-   components/ui/button.tsx
-============================= */
+//
+//  Button.tsx
+//  AI-App-Builder-Pro
+//
+//  Created by Squally Da Boss on 2/22/26.
+//
 
-import * as React from "react";
-import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "@/lib/utils";
 
-const buttonVariants = cva(
-  "inline-flex items-center justify-center rounded-md text-sm font-medium transition",
-  {
-    variants: {
-      variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        outline: "border border-input hover:bg-accent",
-      },
-      size: {
-        default: "h-10 px-4",
-        sm: "h-9 px-3",
-        lg: "h-11 px-8",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
-  }
-);
+// app/builder/components/ui/Button.tsx
+"use client"
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {}
+import React, { ButtonHTMLAttributes } from "react"
 
-export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, ...props }, ref) => (
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  label?: string
+}
+
+export const Button: React.FC<ButtonProps> = ({ label, className = "", ...props }) => {
+  return (
     <button
-      ref={ref}
-      className={cn(buttonVariants({ variant, size }), className)}
       {...props}
-    />
+      className={`px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition ${className}`}
+    >
+      {label || "Button"}
+    </button>
   )
-);
-Button.displayName = "Button";
-
-/* =============================
-   lib/utils.ts
-============================= */
-
-export function cn(...classes: (string | undefined)[]) {
-  return classes.filter(Boolean).join(" ");
 }

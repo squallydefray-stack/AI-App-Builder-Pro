@@ -7,7 +7,7 @@
 
 
 import { initTRPC } from "@trpc/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@lib/prisma";
 
 
 const t = initTRPC.create();
