@@ -1,0 +1,100 @@
+// AICommandProcessor.ts
+// Converts freeform text commands into structured BuilderComponent arrays
+
+import { BuilderComponent } from "@lib/exporter/schema"
+import OpenAI from "openai"
+
+export type AICommand = {
+  components: BuilderComponent[]
+}
+
+/**
+ * parseAICommandToComponents
+ * Converts a freeform text prompt into nested BuilderComponent array using GPT
+ */
+export async function parseAICommandToComponents(command: string): Promise<AICommand> {
+  if (!command.trim()) return { components: [] }
+
+  try {
+    const prompt = `
+You are an AI that outputs a nested JSON array of UI components for a builder.
+- Each component must have: id (unique string), type (string), props (object), children (array), parentId (string|null)
+- Only output valid JSON of the components array (no extra text)
+- Example: {"components":[{"id":"hero","type":"Hero","props":{},"children":[...],"parentId":null}]}
+- Prompt: "${command}"
+    `
+
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    })
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+    })
+
+    const text = response.choices[0].message?.content || ""
+    const jsonMatch = text.match(/\{.*\}/s)
+    if (!jsonMatch) throw new Error("No JSON returned from AI")
+
+    const data = JSON.parse(jsonMatch[0])
+    const components: BuilderComponent[] = Array.isArray(data.components)
+      ? ensureUniqueIds(data.components)
+      : []
+
+    return { components }
+  } catch (err) {
+    console.error("AI Command Error:", err)
+    return {
+      components: [
+        {
+          id: `comp-${Date.now()}`,
+          type: "Text",
+          props: { base: {} },
+          children: [],
+          parentId: null,
+        },
+      ],
+    }
+  }
+}
+
+/**
+ * ensureUniqueIds
+ * Recursively ensures every component has a unique id, base props, and parentId
+ */
+export function ensureUniqueIds(
+  components: BuilderComponent[],
+  prefix = "",
+  parentId: string | null = null
+): BuilderComponent[] {
+  return components.map((c, i) => {
+    const newId = `${prefix}${c.id}-${Date.now()}-${i}`
+
+    return {
+      ...c,
+      id: newId,
+      parentId,
+      props: {
+        ...c.props,
+        base: { ...(c.props?.base || {}) },
+      },
+      children: c.children
+        ? ensureUniqueIds(c.children, `${prefix}${c.id}-`, newId)
+        : [],
+    }
+  })
+}
+if (intent === "list" || intent === "table") {
+  return {
+    type: "Repeater",
+    props: {
+      data: [
+        { name: "Item 1" },
+        { name: "Item 2" },
+      ]
+    },
+    children: [textTemplateComponent]
+  }
+}

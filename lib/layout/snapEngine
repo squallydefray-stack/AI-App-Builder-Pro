@@ -1,0 +1,145 @@
+//
+//  snapEngine.ts
+//  AI-App-Builder-Pro
+//
+//  Ultra Platinum Snap System
+//
+
+// lib/utils/snapEngine.ts
+
+export interface Rect {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+export interface SnapGuide {
+  type: "vertical" | "horizontal"
+  position: number
+}
+
+export interface SnapResult {
+  x: number
+  y: number
+  guides: SnapGuide[]
+}
+
+export interface SnapOptions {
+  threshold?: number
+  snapCenter?: boolean
+}
+
+const DEFAULT_THRESHOLD = 8
+
+function centerX(r: Rect) {
+  return r.x + r.width / 2
+}
+
+function centerY(r: Rect) {
+  return r.y + r.height / 2
+}
+
+export function snapRect(
+  moving: Rect,
+  staticRects: Rect[],
+  options?: SnapOptions
+): SnapResult {
+  const threshold = options?.threshold ?? DEFAULT_THRESHOLD
+  const snapCenter = options?.snapCenter ?? true
+
+  let bestDeltaX: number | null = null
+  let bestDeltaY: number | null = null
+  let bestGuideX: number | null = null
+  let bestGuideY: number | null = null
+
+  for (const rect of staticRects) {
+    const candidatesX = [
+      rect.x,
+      rect.x + rect.width,
+    ]
+
+    const candidatesY = [
+      rect.y,
+      rect.y + rect.height,
+    ]
+
+    if (snapCenter) {
+      candidatesX.push(centerX(rect))
+      candidatesY.push(centerY(rect))
+    }
+
+    // --- Horizontal Snap ---
+    for (const snapX of candidatesX) {
+      const deltas = [
+        snapX - moving.x,
+        snapX - (moving.x + moving.width),
+        snapX - centerX(moving),
+      ]
+
+      for (const delta of deltas) {
+        if (Math.abs(delta) <= threshold) {
+          if (
+            bestDeltaX === null ||
+            Math.abs(delta) < Math.abs(bestDeltaX)
+          ) {
+            bestDeltaX = delta
+            bestGuideX = snapX
+          }
+        }
+      }
+    }
+
+    // --- Vertical Snap ---
+    for (const snapY of candidatesY) {
+      const deltas = [
+        snapY - moving.y,
+        snapY - (moving.y + moving.height),
+        snapY - centerY(moving),
+      ]
+
+      for (const delta of deltas) {
+        if (Math.abs(delta) <= threshold) {
+          if (
+            bestDeltaY === null ||
+            Math.abs(delta) < Math.abs(bestDeltaY)
+          ) {
+            bestDeltaY = delta
+            bestGuideY = snapY
+          }
+        }
+      }
+    }
+  }
+
+  const finalX =
+    bestDeltaX !== null ? moving.x + bestDeltaX : moving.x
+
+  const finalY =
+    bestDeltaY !== null ? moving.y + bestDeltaY : moving.y
+
+  const guides: SnapGuide[] = []
+
+  if (bestGuideX !== null) {
+    guides.push({
+      type: "vertical",
+      position: bestGuideX,
+    })
+  }
+
+  if (bestGuideY !== null) {
+    guides.push({
+      type: "horizontal",
+      position: bestGuideY,
+    })
+  }
+
+  return {
+    x: finalX,
+    y: finalY,
+    guides,
+      component,
+        __meta: {
+          snapped: true
+  }
+}

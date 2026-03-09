@@ -1,0 +1,210 @@
+// app/builder/canvas/RenderComponent.tsx
+"use client"
+
+import { useState, useEffect } from "react"
+import { BuilderComponent, Breakpoint } from "@lib/exporter/schema"
+import { useBuilderStore } from "@/builder/state/builderStore"
+
+interface Props {
+  component: BuilderComponent
+}
+
+/* ============================================================
+   ULTRA PLATINUM COMPONENT RENDERER
+   - Supports all breakpoints
+   - Handles nested children
+   - Respects flex, gaps, alignment, padding, border
+   - Absolute positioning fallback
+============================================================ */
+export function RenderComponent({ component }: Props) {
+  const activeBreakpoint = useBuilderStore((s) => s.activeBreakpoint)
+
+  const resolvedProps = resolveResponsiveProps(
+    component.propsPerBreakpoint || component.props,
+    activeBreakpoint
+  )
+
+  const style = buildStyle(resolvedProps)
+
+  switch (component.type) {
+    case "Text":
+      return (
+        <div style={style}>
+          {resolvedProps.text || "Text"}
+        </div>
+      )
+
+    case "Button":
+      return (
+        <button style={style}>
+          {resolvedProps.label || "Button"}
+        </button>
+      )
+
+    case "Container":
+      return (
+        <div style={style}>
+          {component.children?.map((child) => (
+            <RenderComponent key={child.id} component={child} />
+          ))}
+        </div>
+      )
+
+    default:
+      return (
+        <div style={style}>
+          Unknown component: {component.type}
+        </div>
+      )
+  }
+}
+
+/* ============================================================
+   RESPONSIVE PROP RESOLUTION
+============================================================ */
+function resolveResponsiveProps(
+  props: any,
+  active: Breakpoint
+): Record<string, any> {
+  if (!props?.base) return props || {}
+
+  return {
+    ...props.base,
+    ...(active === "tablet" ? props.tablet || {} : {}),
+    ...(active === "mobile" ? props.mobile || {} : {}),
+  }
+}
+
+/* ============================================================
+   STYLE BUILDER — FULL FLEX & POSITION SUPPORT
+============================================================ */
+function buildStyle(props: Record<string, any>): React.CSSProperties {
+  const isFlex = props.display === "flex"
+
+  return {
+    position: props.position || "absolute",
+    left: props.x ?? 0,
+    top: props.y ?? 0,
+    width: props.width ?? 200,
+    height: props.height ?? 100,
+
+    display: props.display ?? undefined,
+    flexDirection: isFlex ? props.direction : undefined,
+    justifyContent: isFlex ? props.justify : undefined,
+    alignItems: isFlex ? props.align : undefined,
+    gap: isFlex ? props.gap : undefined,
+
+    background: props.background,
+    color: props.color,
+    fontSize: props.fontSize,
+    padding: props.padding,
+    margin: props.margin,
+    borderRadius: props.radius,
+    border: props.border,
+    overflow: props.overflow ?? "visible",
+  }
+}"use client"
+
+import React from "react"
+import { BuilderComponent, Breakpoint } from "@lib/exporter/schema"
+import { useBuilderStore } from "@/builder/state/builderStore"
+
+interface Props {
+  component: BuilderComponent
+}
+
+/* ============================================================
+   ULTRA PLATINUM COMPONENT RENDERER
+   - Supports all breakpoints
+   - Handles nested children
+   - Respects flex, gaps, alignment, padding, border
+   - Absolute positioning fallback
+============================================================ */
+export function RenderComponent({ component }: Props) {
+  const activeBreakpoint = useBuilderStore((s) => s.activeBreakpoint)
+
+  const resolvedProps = resolveResponsiveProps(
+    component.propsPerBreakpoint || component.props,
+    activeBreakpoint
+  )
+
+  const style = buildStyle(resolvedProps)
+
+  switch (component.type) {
+    case "Text":
+      return (
+        <div style={style}>
+          {resolvedProps.text || "Text"}
+        </div>
+      )
+
+    case "Button":
+      return (
+        <button style={style}>
+          {resolvedProps.label || "Button"}
+        </button>
+      )
+
+    case "Container":
+      return (
+        <div style={style}>
+          {component.children?.map((child) => (
+            <RenderComponent key={child.id} component={child} />
+          ))}
+        </div>
+      )
+
+    default:
+      return (
+        <div style={style}>
+          Unknown component: {component.type}
+        </div>
+      )
+  }
+}
+
+/* ============================================================
+   RESPONSIVE PROP RESOLUTION
+============================================================ */
+function resolveResponsiveProps(
+  props: any,
+  active: Breakpoint
+): Record<string, any> {
+  if (!props?.base) return props || {}
+
+  return {
+    ...props.base,
+    ...(active === "tablet" ? props.tablet || {} : {}),
+    ...(active === "mobile" ? props.mobile || {} : {}),
+  }
+}
+
+/* ============================================================
+   STYLE BUILDER — FULL FLEX & POSITION SUPPORT
+============================================================ */
+function buildStyle(props: Record<string, any>): React.CSSProperties {
+  const isFlex = props.display === "flex"
+
+  return {
+    position: props.position || "absolute",
+    left: props.x ?? 0,
+    top: props.y ?? 0,
+    width: props.width ?? 200,
+    height: props.height ?? 100,
+
+    display: props.display ?? undefined,
+    flexDirection: isFlex ? props.direction : undefined,
+    justifyContent: isFlex ? props.justify : undefined,
+    alignItems: isFlex ? props.align : undefined,
+    gap: isFlex ? props.gap : undefined,
+
+    background: props.background,
+    color: props.color,
+    fontSize: props.fontSize,
+    padding: props.padding,
+    margin: props.margin,
+    borderRadius: props.radius,
+    border: props.border,
+    overflow: props.overflow ?? "visible",
+  }
+}

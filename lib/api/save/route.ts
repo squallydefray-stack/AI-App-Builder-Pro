@@ -1,0 +1,20 @@
+import { NextResponse } from "next/server"
+
+export async function POST(req: Request) {
+  const body = await req.json()
+
+    useEffect(() => {
+      const timeout = setTimeout(() => {
+        fetch("/api/save", {
+          method: "POST",
+          body: JSON.stringify(schema)
+        })
+      }, 1000)
+
+      return () => clearTimeout(timeout)
+    }, [schema])
+
+
+  return NextResponse.json({ success: true })
+}
+

@@ -1,0 +1,67 @@
+// lib/snap/snapEngine.ts
+import { BuilderComponent, Breakpoint } from "@lib/exporter/schema"
+
+export interface SnapOptions {
+  animate?: boolean
+}
+
+export interface SnapGuide {
+  type: "vertical" | "horizontal"
+  position: number
+  source: "grid" | "parent" | "component"
+}
+
+/**
+ * Apply snapping logic to a component relative to other components
+ */
+export function applySnapToComponents(
+  component: BuilderComponent,
+  allComponents: BuilderComponent[],
+  breakpoint: Breakpoint,
+  options?: SnapOptions
+): BuilderComponent {
+  const snapped = { ...component }
+
+  // Example snapping logic: modify x/y based on alignment, grid, etc.
+  const props = snapped.propsPerBreakpoint?.[breakpoint] || {}
+  snapped.props = { ...snapped.props, ...props }
+
+  if (options?.animate) {
+    snapped.props = { ...snapped.props, animate: true }
+  }
+
+  // Recursively apply snapping to children
+  if (snapped.children && snapped.children.length > 0) {
+    snapped.children = snapped.children.map((child) =>
+      applySnapToComponents(child, allComponents, breakpoint, options)
+    )
+  }
+
+  return snapped
+}
+
+/**
+ * Generate snap guides (lines) for a component relative to other components
+ */
+export function generateSnapGuides(
+  component: BuilderComponent,
+  allComponents: BuilderComponent[],
+  breakpoint: Breakpoint
+): SnapGuide[] {
+  // Simple placeholder: could compute distances to grid or parent
+  const guides: SnapGuide[] = []
+
+  const props = component.propsPerBreakpoint?.[breakpoint]
+  if (!props) return guides
+
+  // Example: add vertical line at x, horizontal at y
+  if (props.x != null) guides.push({ type: "vertical", position: props.x, source: "component" })
+  if (props.y != null) guides.push({ type: "horizontal", position: props.y, source: "component" })
+
+  return guides
+}
+export interface GuideLine {
+  type: "vertical" | "horizontal"
+  position: number
+  source: "grid" | "parent" | "snap"
+}
